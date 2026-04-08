@@ -1,17 +1,10 @@
-- Rol van ‘invloedrijke’ uitspraken (impactanalyse)
+Hoofdvraag:
+Hoe is de verdeling van citaties (in-degree) in het citatienetwerk van rechtspraak.nl, en in hoeverre is deze geconcentreerd in een klein aantal uitspraken?
 
-Onderzoeksvraag
-“Welke uitspraken hebben de grootste structurele invloed binnen het citatienetwerk van rechtspraak.nl, gemeten via centraliteitsmaten, en waarom?”
+Deelvragen:
+Wat is de verdeling van het aantal ontvangen citaties (in-degree) over uitspraken in het netwerk?
+In hoeverre is de verdeling van citaties ongelijk verdeeld over uitspraken?
+In hoeverre vertoont de in-degree distributie kenmerken van een schaalvrije (power law) verdeling?
+Wat betekenen de gevonden patronen voor de concentratie van invloed binnen het citatienetwerk?
 
-
-- Vergelijking tussen rechtsgebieden (bijv. strafrecht vs. civiel recht)
-
-Onderzoeksvraag
-“Verschilt de structuur van het citatienetwerk tussen verschillende rechtsgebieden op rechtspraak.nl, en zo ja, hoe?”
-
-
-- Mate van centralisatie van het netwerk
-
-Onderzoeksvraag
-“In hoeverre is het citatienetwerk van rechtspraak.nl gecentraliseerd rond een kleine set invloedrijke uitspraken?”
 
