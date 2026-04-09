@@ -20,10 +20,10 @@ In hoeverre vertoont de in-degree distributie kenmerken van een schaalvrije (pow
 Wat betekenen de gevonden patronen voor de concentratie van invloed binnen het citatienetwerk?
 
 
-Method and approach
+# Method and approach
 
-Evaluation
+# Evaluation
 
-Plan
+# Plan
 
-Report and presentations
+# Report and presentations
