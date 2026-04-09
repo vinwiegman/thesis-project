@@ -3,7 +3,7 @@
 
 Juridische citaten .. al lang tijd de kern van juridisch onderzoek. Zoals aangetoond door Marx (1970), maken juristen gebruik van citaties ..., waarbij uitspraken met elkaar verbonden worden in een netwerk van precedenten. Dit proces, ook wel “shepardization” genoemd, impliceert dat citaties betekenisvolle relaties presenteren tussen zaken. Het citatienetwerk kan daarmee worden opgevat als een  
 
-Met de opkomst van computationele methoden is het mogelijk geworden om deze netwerken op grote schaal te analyseren. Een belangrijke studie in dit veld is uitgevoerd door James H. Fowler et al. (2007). 
+Met de opkomst van computationele methoden is het mogelijk geworden om juridische citatienetwerken op grote schaal te analyseren. Een belangrijke studie in deze ontwikkeling is die van Fowler et al. (2007), die het volledige citatienetwerk van uitspraken van het Amerikaanse Supreme Court analyseren en een methode introduceren om de juridische relevantie van uitspraken te meten op basis van citatiepatronen. Hierbij ontwikkelen zij zogenoemde 'importance scores', die gebruik maken van zowel het aantal citaties dat een uitspraak ontvangt als de positie van deze uitspraak binnen het bredere netwerk.
 
 Naast de keuze van centraliteitsmaten speelt ook de structuur van het netwerk als geheel een belangrijke rol. De verdeling van citaties over uitspraken bepaalt in sterke mate hoe invloed 
 
