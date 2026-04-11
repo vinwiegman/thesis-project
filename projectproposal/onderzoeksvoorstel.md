@@ -23,8 +23,11 @@ Hoe is de verdeling van citaties (in-degree) in het citatienetwerk van Rechtspra
 
 Deelvragen:
 Wat is de verdeling van het aantal ontvangen citaties (in-degree) over uitspraken in het citatienetwerk?
+
 In hoeverre is de verdeling van citaties ongelijk verdeeld over uitspraken?
+
 In hoeverre vertoont de in-degree distributie kenmerken van een schaalvrije (power law) verdeling?
+
 Wat betekenen de gevonden patronen voor de concentratie van invloed binnen het citatienetwerk?
 
 
