@@ -13,7 +13,16 @@ Hoewel centraliteitsmaten een krachtig hulpmiddel bieden om invloed binnen netwe
 
 Daarnaast kunnen verschillende centraliteitsmaten leiden tot uiteenlopende resultaten. Fowler en Jeon (2008) laten zien dat het meten van invloed afhankelijk is van de gekozen methode. Zij introduceren de zogeheten *authority scores*, waarbij niet alleen het aantal citaties van een uitspraak relevant is, maar ook de kwaliteit van de uitspraken die deze citeren (Fowler & Jeon, 2008). Dit betekent dat eenvoudige maatstaven, ..., die alle citaties als gelijk behandelen, maar een beperkt beeld geven van invloed. Verschillende manieren van meten kunnen daardoor leiden tot verschillende interpretaties van invloed binnen een netwerk.
 
-Naast de keuze van centraliteitsmaten speelt ook de structuur van het netwerk als geheel een belangrijke rol. De verdeling van citaties over uitspraken bepaalt in sterke mate hoe invloed 
+Naast de keuze van centraliteitsmaten speelt ook de structuur van het netwerk als geheel een belangrijke rol. Binnen de netwerkwetenschap is uitgebreid onderzoek gedaan naar de structuur van citatienetwerken, met name in de context van wetenschappelijke publicaties. Uit deze literatuur blijkt dat de verdeling van citaties vaak sterk scheef is. Een van de eerste systematische analyses van deze verdeling is uitgevoerd door ... Redner 1998, die laat zien dat de *tail* van de citatiedistributie een power-law gedrag vertoont. Dit betekent dat het aantal publicaties met een groot aantal citaties langzaam afneemt volgens een machtswet, wat duidt op een sterke concentratie van citaties in een klein aantal publicaties. ... volledige distributie niet door één enkele functie kan worden beschreven, wat suggereert dat verschillende mechanismen een rol spelen in verschillende delen van de verdeling.
+
+Later onderzoek heeft echter aangetoond dat de volledige citatiedistributie complexer is dan een zuivere power law. Zo tonen ... Young-Ho Eom and Santo Fortunato 2011 ... aan dat 
+
+
+
+
+Ondanks deze inzichten richt een groot deel van de bestaande literatuur zich primair op het identificeren van individuele invloedrijke uitspraken, vaak door middel van ranglijsten op basis van centraliteitsmaten.
+
+Dit onderzoek sluit aan bij
 
 
 
