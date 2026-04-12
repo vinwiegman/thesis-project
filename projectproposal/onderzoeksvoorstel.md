@@ -22,23 +22,26 @@ Dit onderzoek richt zich op een aspect dat in eerdere studies minder centraal st
 
 
 # Research question
-Uit de literatuur blijkt dat juridische citatienetwerken vaak worden geanalyseerd met behulp van centraliteitsmaten, waarbij de nadruk ligt op het identificeren van individuele invloedrijke uitspraken. Tegelijkertijd laten studies binnen de netwerkwetenschap zien dat citatienetwerken ... een scheve verdeling vertonen, waarbij een klein aantal knopen een groot deel van de ... . 
+Uit de literatuur blijkt dat juridische citatienetwerken vaak worden geanalyseerd met behulp van centraliteitsmaten, waarbij de nadruk ligt op het identificeren van individuele invloedrijke uitspraken. Tegelijkertijd laten studies binnen de netwerkwetenschap zien dat citatienetwerken ... een scheve verdeling vertonen, waarbij een klein aantal knopen een groot deel van de ... . Deze inzichten suggereren dat niet alleen individuele uitspraken van belang zijn, maar ook de manier waarop citaties over het netwerk als geheel zijn verdeeld. Deze inzichten suggereren dat niet alleen individuele uitspraken van belang zijn, maar ook de manier waarop citaties over het netwerk als geheel zijn verdeeld.
 
+De centrale onderzoeksvraag luidt: "*Hoe is de verdeling van citaties (in-degree) in het citatienetwerk van Rechtspraak.nl, en in hoeverre is de verdeling geconcentreerd in een klein aantal uitspraken?*"
 
-Hoofdvraag:
-Hoe is de verdeling van citaties (in-degree) in het citatienetwerk van Rechtspraak.nl, en in hoeverre is de verdeling geconcentreerd in een klein aantal uitspraken?
+Om deze vraag te beantwoorden, worden de volgende deelvragen geformuleerd:
 
-Deelvragen:
-Wat is de verdeling van het aantal ontvangen citaties (in-degree) over uitspraken in het citatienetwerk?
+1. Wat is de verdeling van het aantal ontvangen citaties (in-degree) over uitspraken in het citatienetwerk?
 
-In hoeverre is de verdeling van citaties ongelijk verdeeld over uitspraken?
+2. In hoeverre is de verdeling van citaties ongelijk verdeeld over uitspraken?
 
-In hoeverre vertoont de in-degree distributie kenmerken van een schaalvrije (power law) verdeling?
+3. In hoeverre vertoont de in-degree distributie kenmerken van een schaalvrije (power law) verdeling?
 
-Wat betekenen de gevonden patronen voor de concentratie van invloed binnen het citatienetwerk?
+4. Wat betekenen de gevonden patronen voor de concentratie van invloed binnen het citatienetwerk?
 
 
 # Method and approach
+In dit onderzoek worden Nederlandse juridische citaties geanalyseerd met behulp van netwerkanalyse. De analyse is gebaseerd op een dataset afkomstig van Rechtspraak.nl, waarin uitspraken en de citaties tussen deze uitspraken zijn opgenomen. De data bevat onder andere verwijzingen tussen uitspraken, waarmee een citatienetwerk kan worden opgebouwd. 
+
+Het citatienetwerk wordt gemodelleerd als een gericht netwerk, waarbij elke uitspraak wordt gemodelleerd als een knoop (node) en elke citatie als een gerichte verbinding (edge) van de citerende uitspraak naar de geciteerde uitspraak.
+
 
 # Evaluation
 
