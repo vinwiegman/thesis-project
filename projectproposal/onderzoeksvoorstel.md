@@ -38,9 +38,7 @@ Om deze vraag te beantwoorden, worden de volgende deelvragen geformuleerd:
 
 
 # Method and approach
-In dit onderzoek worden Nederlandse juridische citaties geanalyseerd met behulp van netwerkanalyse. De analyse is gebaseerd op een dataset afkomstig van Rechtspraak.nl, waarin uitspraken en de citaties tussen deze uitspraken zijn opgenomen. De data bevat onder andere verwijzingen tussen uitspraken, waarmee een citatienetwerk kan worden opgebouwd. 
-
-Het citatienetwerk wordt gemodelleerd als een gericht netwerk, waarbij elke uitspraak wordt gemodelleerd als een knoop (node) en elke citatie als een gerichte verbinding (edge) van de citerende uitspraak naar de geciteerde uitspraak.
+In dit onderzoek worden Nederlandse juridische citaties geanalyseerd met behulp van netwerkanalyse. De analyse is gebaseerd op een dataset afkomstig van Rechtspraak.nl, waarin uitspraken en de citaties tussen deze uitspraken zijn opgenomen. De data bevat onder andere verwijzingen tussen uitspraken, waarmee een citatienetwerk kan worden opgebouwd. Het citatienetwerk wordt gemodelleerd als een gericht netwerk, waarbij elke uitspraak wordt gemodelleerd als een knoop (node) en elke citatie als een gerichte verbinding (edge) van de citerende uitspraak naar de geciteerde uitspraak.
 
 
 # Evaluation
