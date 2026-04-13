@@ -68,7 +68,5 @@ In de vierde fase worden de resultaten geïnterpreteerd en vergeleken met de bes
 De laatste fase bestaat uit het afronden van het schrijven van de scriptie en het voorbereiden van de presentatie. Deze fase valt deels samen met de analyse, zodat resultaten direct kunnen worden verwerkt in de tekst.
 
 # Report and presentations
-De output van dit onderzoek is een 
-The final output of the project will consist of a written research report, along
-with a presentation summarizing and explaining the work.
+De output van dit onderzoek is een schriftelijke rapportage van de resultaten. De bevindingen worden vastgelegd in de scriptie, waarin zowel de theoretische achtergrond, de methode als de resultaten en interpretaties worden beschreven. Naast de scriptie wordt ook een Jupyter Notebook opgeleverd, waarin de dataverwerking, netwerkanalyse en visualisaties zijn uitgewerkt.
 
