@@ -36,10 +36,25 @@ Om deze vraag te beantwoorden, worden de volgende deelvragen geformuleerd:
 
 4. Wat betekenen de gevonden patronen voor de concentratie van invloed binnen het citatienetwerk?
 
-
+z
 # Method and approach
-In dit onderzoek worden Nederlandse juridische citaties geanalyseerd met behulp van netwerkanalyse. De analyse is gebaseerd op een dataset afkomstig van Rechtspraak.nl, waarin uitspraken en de citaties tussen deze uitspraken zijn opgenomen. De data bevat onder andere verwijzingen tussen uitspraken, waarmee een citatienetwerk kan worden opgebouwd. Het citatienetwerk wordt gemodelleerd als een gericht netwerk, waarbij elke uitspraak wordt gemodelleerd als een knoop (node) en elke citatie als een gerichte verbinding (edge) van de citerende uitspraak naar de geciteerde uitspraak.
+Dit onderzoek maakt gebruik van een netwerkanalyse van Nederlandse juridische citaties. De analyse is gebaseerd op een dataset met verwijzingen tussen juridische documenten van Rechtspraak.nl, 
 
+. De data bevat onder andere verwijzingen tussen uitspraken, waarmee een citatienetwerk kan worden opgebouwd. 
+
+De analyse is gebaseerd op een dataset waarin verwijzingen tussen juridische documenten, afkomstig van Rechtspraak.nl, zijn vastgelegd in de vorm van bron- en doel-URI’s. In de eerste stap worden deze verwijzingen ingelezen en bewerkt, waarbij de relevante onderdelen van de URI’s worden gebruikt om alle unieke uitspraken te identificeren. Omdat dezelfde uitspraak in verschillende vormen kan voorkomen, worden identifiers eerst genormaliseerd en vervolgens samengevoegd, zodat elke uitspraak slechts één keer in het netwerk voorkomt.
+
+in verschillende vormen kan voorkomen binnen de data, worden identifiers waar
+
+Vervolgens wordt het citatienetwerk gemodelleerd als een gericht netwerk, waarbij elke uitspraak wordt gemodelleerd als een knoop (node) en elke citatie als een gerichte verbinding (edge) van de citerende uitspraak naar de geciteerde uitspraak. Aangezien de dataset ook verwijzingen naar andere juridische bronnen bevat, zoals wetgeving, wordt het netwerk in deze stap beperkt tot verwijzingen tussen uitspraken onderling. Deze afbakening zorgt ervoor dat de analyse zich richt op citatiepatronen binnen de rechtspraak zelf.
+
+De opbouw van het netwerk bestaat uit meerdere stappen. Allereerst worden de relevante kolommen uit de dataset ingelezen en worden de bron- en doelverwijzingen geïdentificeerd. Vervolgens worden deze verwijzingen opgeschoond door
+
+De kern van de analyse richt zich vervolgens op de verdeling van in-degree. Deze wordt onderzocht met behulp van zowel statistische maten als visualisaties.
+
+Ten slotte wordt onderzocht in hoeverre de waargenomen verdeling overeenkomt met bekende netwerkstructuren, zoals schaalvrije netwerken.
+
+De uitvoering van deze stappen vindt plaats in een Python-omgeving, waarbij gebruik wordt gemaakt van
 
 # Evaluation
 
