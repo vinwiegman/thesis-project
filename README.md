@@ -39,12 +39,13 @@ Raw data and the large intermediate files are not included in this repository (s
 ├── notebooks/
 │   ├── 1-network_analysis.ipynb
 │   ├── 2- hele_netwerk.ipynb
-│   └── 3- winkels_vergelijking.ipynb
-├── thesis/
-│   └── thesis.pdf            
+│   └── 3- winkels_vergelijking.ipynb         
 ├── slides/
 │   ├── defense.pdf
-│   └── defense.tex           
-├── references (4).bib
-└── README.md
+│   └── defense.tex
+├── thesis/
+│   └── thesis.pdf              
+├── README.md
+└── references (4).bib
+
 ```
