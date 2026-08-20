@@ -49,3 +49,55 @@ Raw data and the large intermediate files are not included in this repository (s
 └── references (4).bib
 
 ```
+
+## Key findings
+
+- **Macrostructure (DV1):** The network is connected (largest weakly connected component = 73.6% of nodes) but almost acyclic (largest strongly connected component = only 26 nodes). Unlike the WWW, it shows **no bow-tie structure**. The densest k-core (k=19) consists of rechtbanken (district courts) citing each other within the same legal domain, not the most-cited authorities.
+- **Distribution of influence (DV2):** Influence is highly concentrated: the top 1% of rulings receive 36% of all citations. Gini coefficients range from 0.447 (PageRank) to 0.994 (HITS authority). The tail resembles a power law (exponent ≈ 2), but likelihood-ratio tests show a log-normal distribution fits at least as well: a heavy tail, but power law is not confirmed as the underlying model. The single most authoritative ruling is the *Haviltex* judgment (HR:1981:AG4158), the leading case on contract interpretation; 92 of the top 100 rulings by HITS authority are Hoge Raad decisions.
+- **Agreement between measures (DV3):** In-degree and PageRank are strongly correlated (Spearman's ρ = 0.880) and largely interchangeable as general influence measures. HITS authority diverges (ρ = 0.39 vs. PageRank), capturing a more positional property rather than broad influence.
+- **Communities vs. legal domains (DV4):** Leiden community detection on the largest component finds 272 communities (modularity Q = 0.86). Communities are internally very pure (avg. purity 0.94) but each legal domain fragments into many small communities (ARI = 0.079, homogeneity = 0.72): the network reconstructs law as many specialized sub-fields rather than a few broad domains.
+- **Citation flow between courts (DV5):** Contrary to the expectation of citations flowing mostly upward (lower courts citing higher courts), assortativity is slightly positive (r = 0.105), driven by high self-citation rates in the highest administrative courts (Raad van State 67%, Centrale Raad van Beroep 64%, College van Beroep voor het bedrijfsleven 81%).
+
+**Conclusion:** the citation network is connected but nearly acyclic, with extremely unevenly distributed influence, organized along three principles: temporal ordering (citations point to the past), specialization (citations stay within their legal domain), and hierarchy (upward cassation flow, partly offset by self-citation).
+
+## Reproducing the analysis
+
+The notebooks were run in Python with:
+
+```
+pandas, numpy, scipy, scikit-learn
+networkx, python-igraph, leidenalg, powerlaw
+matplotlib, seaborn
+```
+
+```bash
+pip install pandas numpy scipy scikit-learn networkx python-igraph leidenalg powerlaw matplotlib seaborn
+```
+
+The underlying citation data is derived from Rechtspraak.nl open data via LIDO and is not redistributed here; see the [Rechtspraak.nl open data documentation](https://www.rechtspraak.nl/Uitspraken/paginas/open-data.aspx) for access.
+
+## Limitations
+
+- Citation types are not differentiated: the network does not distinguish whether a citation affirms, distinguishes, or rejects the cited ruling.
+- Data cleaning isolates roughly 23,000 nodes.
+- Legal domain (*rechtsgebied*) is known for 91% of rulings, PHR opinions require separate interpretation.
+- Covers case law only, not legislation, and Rechtspraak.nl itself is a curated selection of Dutch case law rather than a complete record.
+
+## Future work
+
+- Incorporate citation function (affirming vs. distinguishing vs. rejecting).
+- Study the temporal dynamics of influence following a landmark ruling.
+- Explicitly weight or separate out PHR opinions in the network.
+- Compare against citation networks from other legal systems.
+
+
+## Citation
+
+If you use this work, please cite:
+
+> Wiegman, V.H.Z.R. (2026). *Citatiestructuren in de Nederlandse rechtspraak: Een netwerkanalyse van macrostructuur, invloed en organisatie* [Bachelor's thesis, University of Amsterdam].
+
+## Contact
+
+Vincent H.Z.R. Wiegman, [vinwiegman@gmail.com](mailto:vinwiegman@gmail.com)
+
