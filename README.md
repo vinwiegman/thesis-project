@@ -37,13 +37,14 @@ Raw data and the large intermediate files are not included in this repository (s
 ```
 .
 ├── notebooks/
-│   ├── analysis.ipynb        # main analysis notebook: data loading, cleaning, DV1-DV5
-│   └── bowtie_diagram.ipynb  # generates the bow-tie structure figure
+│   ├── 1-network_analysis.ipynb
+│   ├── 2- hele_netwerk.ipynb
+│   └── 3- winkels_vergelijking.ipynb
 ├── thesis/
-│   ├── thesis.pdf            # final thesis
-│   └── thesis.tex            # LaTeX source
+│   └── thesis.pdf            
 ├── slides/
-│   └── defense.tex           # thesis defense slides (Beamer, Dutch)
-├── references.bib
+│   ├── defense.pdf
+│   └── defense.tex           
+├── references (4).bib
 └── README.md
 ```
