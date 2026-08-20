@@ -1,0 +1,1279 @@
+\documentclass[a4paper, 12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{xcolor}
+\usepackage{afterpage}
+\usepackage{relsize}
+\usepackage{moresize}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage[dutch]{babel}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{float}
+
+
+\usepackage[
+  backend=biber,
+  style=apa,
+  sorting=nyt,
+  dashed=false,
+  maxbibnames=99,
+  maxcitenames=2,
+  mincitenames=1,
+  maxnames=2,
+]{biblatex}
+\addbibresource{references.bib}
+
+\DefineBibliographyStrings{dutch}{%
+  andothers = {et\addabbrvspace al\adddot},
+  andmore   = {et\addabbrvspace al\adddot},
+}
+
+
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+% -------------------------------------------------------
+\newcommand{\theTitle}{Citatiestructuren in de Nederlandse rechtspraak}
+\newcommand{\theSubTitle}{Een netwerkanalyse van macrostructuur, invloed en organisatie}
+\newcommand{\theAuthor}{Vincent H.Z.R. Wiegman}
+\newcommand{\theStudentID}{14661152}
+\newcommand{\theSupervisor}{Dr. M.J. Marx}
+\newcommand{\theInstitute}{
+  Informatics Institute \\
+  Faculty of Science\\
+  University of Amsterdam\\
+  Science Park 900 \\
+  1098 XH Amsterdam
+}
+\newcommand{\theDate}{Semester 2, 2025-2026}
+
+% -------------------------------------------------------
+\begin{document}
+
+% ============================================================
+% TITELBLAD
+% ============================================================
+\pagestyle{empty}
+\begin{center}
+
+\vspace{1.5cm}
+
+\begin{Huge}
+\theTitle
+\end{Huge} \\
+
+\vspace{0.3cm}
+
+\begin{Large}
+\theSubTitle
+\end{Large}
+
+\vspace{1.0cm}
+
+\theAuthor\\
+\theStudentID
+
+\vspace{1.0cm}
+
+Bachelor thesis\\
+Credits: 18 EC
+
+\vspace{0.4cm}
+
+Bachelor \textit{Informatiekunde} \\
+\vspace{0.2cm}
+\includegraphics[width=0.075\paperwidth]{uva_logo} \\
+\vspace{0.1cm}
+
+University of Amsterdam\\
+Faculty of Science\\
+Science Park 900\\
+1098 XH Amsterdam
+
+\vspace{1.2cm}
+
+\emph{Supervisor}\\
+
+\theSupervisor
+
+\vspace{0.25cm}
+
+\theInstitute
+
+\vspace{0.8cm}
+
+\theDate
+
+\end{center}
+\newpage
+
+% ============================================================
+% ABSTRACT
+% ============================================================
+\pagestyle{empty}
+\vspace*{1cm}
+\begin{center}
+{\large\textbf{Abstract}}
+\end{center}
+
+\noindent
+Juridische uitspraken vormen samen een citatienetwerk waarin elke uitspraak een knoop is en elke verwijzing een gerichte edge. Deze scriptie analyseert dat netwerk voor de Nederlandse jurisprudentie van Rechtspraak.nl, op basis van de LIDO-dataset. Na voorbewerking bevat de gerichte jurisprudentie-subgraaf 674.589 uitspraken en 1.223.458 citaties. Het onderzoek beschrijft de macrostructuur van het netwerk, de verdeling van invloed over uitspraken, de overeenstemming tussen invloedmaten, de communitystructuur ten opzichte van de juridische rechtsgebieden, en de citatieflow tussen rechterlijke instanties. Het netwerk is samenhangend maar vrijwel acyclisch: 73,6\% van de knopen ligt in één zwakke component, terwijl de grootste sterke component slechts 26 knopen bevat. Invloed is sterk geconcentreerd, maar de mate hangt af van de gekozen maat. De zware staart van de verdelingen wijkt niet duidelijk af van een log-normale verdeling, waardoor een power-law niet als verklarend model kan worden aangenomen. In-degree en PageRank rangschikken uitspraken grotendeels hetzelfde (Spearman 0,880), terwijl HITS-authority een kleine kern van standaardarresten van de Hoge Raad aanwijst en daarom alleen als diagnostische maat wordt gebruikt. De gevonden Leiden-communities vallen niet één-op-één samen met de rechtsgebieden, maar zijn intern vrijwel zuiver en komen vooral overeen met de fijnere deelgebieden. Citaties blijven sterk binnen het eigen rechtsgebied. De assortativity op instantietype is licht positief ($r = 0{,}105$). Hoewel een opwaartse citatieflow naar de Hoge Raad zichtbaar is, wordt deze grotendeels gecompenseerd door de zelfverwijzende netwerken van de hoogste bestuursrechters. Samen laten deze resultaten zien dat het Nederlandse jurisprudentienetwerk een tijdgeordende en sterk geconcentreerde structuur heeft die zich vooral organiseert langs specialistische rechtsgebieden en langs de hiërarchie van rechterlijke instanties.
+
+
+\vspace{0.4cm}
+\noindent
+\textbf{Trefwoorden:} netwerkanalyse, citatienetwerk, jurisprudentie, juridische invloed, centraliteitsmaten, communitydetectie, Rechtspraak.nl
+
+\newpage
+
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagestyle{plain}
+\tableofcontents
+
+\newpage
+
+
+
+% ============================================================
+\chapter{Introductie}
+\label{ch:intro}
+% ============================================================
+
+Juridische uitspraken zijn geen losse documenten, maar vormen een uitgebreid netwerk van verwijzingen naar eerdere rechtspraak. Een rechter die een arrest schrijft, citeert eerdere uitspraken om zijn beslissingen te onderbouwen of om af te wijken van bestaande rechtspraak. Wanneer al deze verwijzingen worden opgeteld over duizenden uitspraken ontstaat er een citatienetwerk waarin elke uitspraak een knoop is en elke citatie een pijl van de citerende naar de geciteerde uitspraak. Deze representatie maakt het mogelijk om met methoden uit de netwerkwetenschap structurele eigenschappen van het rechtssysteem zichtbaar te maken die moeilijk kwantificeerbaar zijn.
+
+De dataset die voor dit onderzoek wordt gebruikt is afkomstig uit het LIDO-project (Linked Data Overheid), verkregen via begeleider Maarten Marx (Universiteit van Amsterdam), waarin verwijzingen tussen juridische documenten van Rechtspraak.nl zijn vastgelegd in de vorm van bron- en doel-URI's. Na het verwerken bevat de dataset 7,3 miljoen verwijzingen tussen ongeveer 1,6 miljoen knopen, waaronder uitspraken (jurisprudentie), wetsartikelen (BWB), regelgeving en EU-bronnen. Voor dit onderzoek wordt het netwerk beperkt tot citaties tussen uitspraken onderling, de subgraaf van de op Rechtspraak.nl gepubliceerde jurisprudentie.
+
+De keuze voor deze subgraaf hangt samen met de positie van jurisprudentie binnen het Nederlandse recht. Het Nederlandse recht behoort tot de civielrechtelijke (Romeinse) traditie, waarin de wet de primaire rechtsbron is. Dat verschilt van de Angelsaksische common-law-traditie, waar precedenten formeel bindend zijn via de leer van \textit{stare decisis} en rechtspraak daardoor een centrale plaats inneemt \parencite{merryman}. In het Nederlandse stelsel vormt wetgeving de primaire rechtsbron en bestaat geen formele leer van stare decisis, waardoor eerdere uitspraken rechters niet juridisch binden. Toch verwijzen Nederlandse rechters in de praktijk stelselmatig naar eerdere uitspraken \parencite{winkels2012, vanopijnen2012}, en juist die verwijzingen vormen de citatierelaties die dit onderzoek bestudeert. De jurisprudentie-subgraaf is daarmee niet het volledige rechtssysteem, maar het deel waarin de onderlinge beïnvloeding tussen uitspraken zichtbaar wordt. Dit onderzoek beperkt zich tot die subgraaf omdat de centrale vraag gaat over de structuur van invloed tussen uitspraken, niet over de relatie tussen uitspraken en wetgeving.
+
+
+Eerder onderzoek naar juridische citatienetwerken heeft zich vooral gericht op het identificeren van individuele invloedrijke uitspraken via een gekozen centraliteitsmaat \parencite{fowler2008, fowler2007, vanopijnen2012, winkels2012}. Daarbij wordt invloed meestal met één centrale maat gemeten, terwijl verschillende studies laten zien dat de keuze van invloedmaat een grote invloed heeft op de uitkomst \parencite{fowler2008, vanopijnen2012}. Deze scriptie richt zich daarom niet op één enkele maat voor juridische invloed, maar analyseert de netwerkstructuur en meerdere indicatoren van invloed tegelijk. Daarmee ontstaat een beeld van waar invloed binnen het Nederlandse jurisprudentienetwerk geconcentreerd is (in welke uitspraken, rechtsgebieden en rechterlijke instanties), en in hoeverre deze bevindingen robuust zijn voor methodologische keuzes.
+
+De centrale onderzoeksvraag luidt:
+
+\begin{quote}
+\textit{Welke structurele eigenschappen vertoont het Nederlandse jurisprudentie-citatienetwerk van Rechtspraak.nl, en hoe is juridische invloed binnen dit netwerk verdeeld over uitspraken, rechtsgebieden en rechterlijke instanties?}
+\end{quote}
+
+Deze hoofdvraag wordt uitgewerkt in de volgende deelvragen:
+
+\begin{enumerate}
+  \item Hoe valt de jurisprudentie-subgraaf uiteen in componenten, in hoeverre vertoont deze een bow-tie-structuur vergelijkbaar met die van het WWW \parencite{broder2000}, en welke dichte kernstructuren worden zichtbaar via k-core-analyse?
+  \item Hoe is invloed verdeeld over uitspraken volgens in-degree, PageRank en HITS-authority, en in hoeverre vertonen deze verdelingen een power-law?
+  \item In welke mate identificeren in-degree, PageRank en HITS-authority dezelfde uitspraken als invloedrijk, en zijn er systematische verschillen?
+  \item Welke communities ontstaan via Leiden-detectie \parencite{traag2019} op de jurisprudentie-subgraaf, en in hoeverre vallen deze samen met de rechtsgebieden?
+  \item In welke mate komen citaties uit lagere instanties (rechtbank, kantongerecht) terecht bij hogere instanties (gerechtshof, Hoge Raad, Raad van State, CRvB, CBb), en wat zegt de assortativity over de hiërarchische structuur van het netwerk?
+\end{enumerate}
+
+Anders dan veel bestaand onderzoek ligt de focus in deze scriptie dus niet op het identificeren van afzonderlijke invloedrijke uitspraken, maar op de vorm van de verdeling van invloed en op de organiserende principes daarachter. Door de macrostructuur, invloedmaten, communitystructuur en assortativity op instantietype te combineren, ontstaat een beschrijving van het Nederlandse juridische citatienetwerk die zowel methodisch robuust is als juridisch-institutioneel betekenisvol kan worden geïnterpreteerd.
+
+% ============================================================
+\chapter{Theoretisch kader}
+\label{ch:kader}
+% ============================================================
+
+Netwerkanalyse van rechtspraak komt voort uit de gedachte dat het recht niet alleen bestaat uit losse uitspraken, maar uit het geheel van verwijzingen daartussen. Wanneer een rechter naar een eerdere uitspraak verwijst, ontstaat een relatie tussen beide uitspraken. Het geheel van deze verwijzingen vormt een citatienetwerk. Door dit netwerk als geheel te analyseren, wordt zichtbaar welke uitspraken een centrale positie innemen, hoe verschillende delen van het recht met elkaar verbonden zijn en hoe juridische invloed door het netwerk loopt. Dit type onderzoek is relevant omdat het structurele eigenschappen zichtbaar maakt die met traditionele juridische lezing moeilijk te kwantificeren zijn, en omdat het uitspraken kan rangschikken op hun positie in het netwerk in plaats van op losse kenmerken. Dit hoofdstuk plaatst het onderzoek in de context van eerder werk en bespreekt vervolgens de methoden die in de analyse worden gebruikt.
+
+
+\section{Juridische citaties als netwerk}
+
+Juridische citaten vormen al lange tijd de kern van juridisch onderzoek. Zoals aangetoond door \textcite{marx1970}, maken juristen gebruik van citaties om eerdere uitspraken te vinden en te volgen, waarbij uitspraken met elkaar verbonden worden in een netwerk van precedenten. Dit proces, ook wel \textit{shepardization} genoemd, impliceert dat citaties betekenisvolle relaties representeren tussen zaken. Het citatienetwerk kan daarmee worden opgevat als een weerspiegeling van de interne structuur van het recht.
+
+Met de opkomst van computationele methoden is het mogelijk geworden om juridische citatienetwerken op grote schaal te analyseren. \textcite{fowler2007} analyseren het volledige citatienetwerk van uitspraken van het Amerikaanse Supreme Court (1791--2005) en introduceren importance scores waarin zowel het aantal ontvangen citaties als de positie in het netwerk worden meegenomen. \textcite{fowler2008} vergelijken deze scores met de in-degree en laten zien dat de keuze van centraliteitsmaat sterk beïnvloedt welke uitspraken als invloedrijk gezien worden. Sindsdien is netwerkanalyse ook toegepast op Nederlandse rechtspraak. \textcite{winkels2012} vergelijken in-degree en PageRank op Nederlandse jurisprudentie, terwijl \textcite{vanopijnen2012} verschillende netwerkmaten onderzoekt voor het meten van juridische relevantie. Deze studies laten zien dat de keuze van centraliteitsmaat invloed heeft op welke uitspraken als belangrijk naar voren komen.
+
+\section{Verwant onderzoek}
+De netwerkbenadering van rechtspraak is in verschillende rechtsstelsels toegepast, met dezelfde vraag: welke uitspraken zijn invloedrijk, en hoe is die invloed gestructureerd? \textcite{fowler2007} en \textcite{fowler2008} analyseerden het volledige citatienetwerk van het Amerikaanse Supreme Court en lieten zien dat netwerkmaten beter dan eenvoudige citaataantallen voorspellen welke uitspraken later worden aangehaald. Voor het Nederlandse recht vergeleken \textcite{winkels2012} in-degree en PageRank, en onderzocht \textcite{vanopijnen2012} welke netwerkmaten het meest geschikt zijn om juridische relevantie te meten. Van Opijnen concludeert dat een gewogen, logaritmisch geschaalde citatiemaat beter presteert dan een gewone in-degree. In zijn MARC-maat tellen herhaalde citaties mee en worden zeer hoge citatieaantallen logaritmisch afgevlakt, waardoor de invloed van uitschieters wordt beperkt.
+
+De netwerkbenadering is ook buiten het nationale recht toegepast. \textcite{derlen2014} analyseerden de rechtspraak van het Hof van Justitie van de Europese Unie en gebruikten de citatiestructuur om het relatieve belang van afzonderlijke arresten te bepalen. \textcite{lupu2012} analyseerden het citatienetwerk van het Europees Hof voor de Rechten van de Mens en lieten zien dat eerdere uitspraken daar een belangrijke rol spelen, ondanks het ontbreken van formeel bindend precedent. Deze studies laten zien dat netwerkanalyse bruikbaar is in verschillende rechtsstelsels, maar ook dat de structuur van een citatienetwerk samenhangt met de institutionele kenmerken van het betreffende rechtsstelsel.
+
+
+\section{Macrostructuur van citatienetwerken}
+Een belangrijke eerste stap in netwerkanalyse is het beschrijven van de macrostructuur. \textcite{broder2000} introduceren voor het World Wide Web de zogeheten bow-tie-decompositie, waarin het netwerk wordt opgedeeld in een centrale strongly connected component (SCC), een IN-component die de SCC kan bereiken, een OUT-component die door de SCC bereikt wordt, en tendrils en tubes. Voor het WWW vinden zij dat ongeveer 28\% van het netwerk in de SCC zit. Juridische citatienetwerken verschillen echter van het WWW doordat citaties in principe altijd naar het verleden wijzen. Daardoor ligt het voor de hand dat de SCC in zulke netwerken relatief klein is en dat de netwerkstructuur sterker acyclische kenmerken vertoont.
+
+Naast de bow-tie kan de dichtheidsstructuur worden bekeken via k-core decomposition \parencite{carmi2007, seidman1983}. Door iteratief knopen met graad lager dan $k$ te verwijderen ontstaat een geneste structuur van schillen, waarbij de binnenste k-cores een dichte kern vormt van knopen die elk met minstens $k$ andere kernknopen verbonden zijn. Voor citatienetwerken laat deze maat zien waar de samenhang zit, los van de richting van de pijlen, iets dat bow-tie niet laat zien.
+
+\section{Centraliteits- en invloedmaten}
+
+De eenvoudigste maat voor het meten van invloed in een citatienetwerk is in-degree: het aantal inkomende citaties. Hoewel de in-degree eenvoudig te interpreteren is, behandelt deze maat alle citaties als gelijkwaardig. PageRank \parencite{brin1998} corrigeert dit door citaties te wegen op de invloed van de citerende knoop: een citaat vanuit een veelgeciteerde uitspraak telt zwaarder dan een citaat vanuit een uitspraak die nauwelijks geciteerd wordt. HITS \parencite{kleinberg1999} splitst dit verder uit in hubs en authorities: een goede hub citeert veel goede authorities, en een goede authority wordt geciteerd door veel goede hubs. In juridische citatienetwerken is HITS-authority een belangrijke maat omdat het meet wanneer een uitspraak wordt geciteerd door uitspraken die zelf goed verbonden zijn, waarbij invloed mede afhangt van de invloed van de citerende uitspraken \parencite{fowler2008}.
+
+\section{Verdelingen en power-laws}
+
+Citatienetwerken vertonen typisch een zwaar-scheve verdeling van inkomende citaties, waarbij een klein aantal uitspraken disproportioneel veel verwijzingen ontvangt en de grote meerderheid nauwelijks of helemaal niet wordt geciteerd. Deze scheve verdeling wordt vaak verklaard via mechanismen als preferential attachment \parencite{barabasi1999}, die voorspellen dat de verdeling een power-law-staart krijgt: $P(k) \propto k^{-\alpha}$.
+
+Een rechte lijn op een log-log-plot is echter een zwak bewijs voor een power-law. \textcite{clauset2009} ontwikkelen een toetsbare procedure waarin de power-law-staart wordt geschat met maximum likelihood, de drempel $x_{\min}$ wordt gekozen die de Kolmogorov-Smirnov-afstand minimaliseert, en het power-law-model wordt vergeleken met alternatieve verdelingen zoals log-normaal of stretched exponential. Deze procedure vormt de basis voor de power-law-toetsing in deze scriptie.
+
+\textcite{broido2019} passen deze procedure systematisch toe op bijna duizend empirische netwerken en vinden dat een strikte schaalvrije structuur zeldzamer is dan vaak wordt aangenomen. Log-normale en stretched exponential verdelingen blijken in formele likelihood ratio tests vaak even goed of beter bij de data te passen dan power laws. Een zwaar-scheve verdeling impliceert dus niet automatisch een power-law. In dit onderzoek wordt daarom geen power-law-conclusie getrokken zonder dat het model ook beter presteert dan alternatieve verdelingen.
+
+\section{Community detection en juridische deelgebieden}
+
+Een citatienetwerk kan ook worden geanalyseerd via communities: groepen knopen die onderling meer met elkaar verbonden zijn dan met de rest van het netwerk. \textcite{newman2006} introduceert hiervoor modulariteit $Q$, een maat voor de mate waarin een partitie meer interne en minder externe verbindingen vertoont dan onder een random model verwacht. Het Louvain-algoritme \parencite{blondel2008} optimaliseert modulariteit $Q$ via een snelle hiërarchische heuristiek, maar kan partities produceren waarin communities intern niet compleet verbonden zijn. Het Leiden-algoritme \parencite{traag2019} bouwt hierop voort en garandeert intern verbonden communities. Daarom wordt Leiden in dit onderzoek gebruikt voor de communitydetectie.
+
+Voor juridische citatienetwerken is daarbij de centrale vraag of de algoritmisch gevonden communities samenvallen met inhoudelijke rechtsgebieden (belasting-, straf-, bestuurs-, civiel-, familierecht). Dit is een vorm van unsupervised classification waarbij de gevonden communities kunnen worden vergeleken met de bekende rechtsgebiedlabels: hoe goed reconstrueert het algoritme de juridische rechtsgebieden zonder labels te zien? Rechtspraak.nl classificeert per uitspraak het rechtsgebied in een \texttt{dcterms:subject}-veld. Deze labels zijn voor dit onderzoek beschikbaar via een export uit de LIDO-data. Dat maakt een directe vergelijking mogelijk via overeenstemmingsmaten als de Adjusted Rand Index \parencite{hubert1985}, Normalized Mutual Information \parencite{Danon_2005} en homogeniteit \parencite{rosenberg2007}.
+
+
+\section{Assortativity en hiërarchische structuur}
+
+In sociale netwerken geldt het principe van homofilie: knopen met vergelijkbare eigenschappen zijn vaker met elkaar verbonden \parencite{mcpherson2001}. \textcite{newman2003} meet dit voor netwerken via de assortativity coefficient $r$, die loopt van $-1$ (perfect disassortatief: alle verbindingen lopen tussen verschillende types) via 0 (random) tot $+1$ (perfect assortatief: alle verbindingen binnen één type). Voor categoriale indelingen zoals rechterlijke instantie laat deze coëfficiënt zien of citaties voornamelijk binnen of juist tussen instantietypen verwijzen.
+
+In het Nederlandse rechtssysteem bestaat een hiërarchie tussen instanties: rechtbanken en kantongerechten vormen de lagere rechtspraak, gerechtshoven behandelen hoger beroep, en de Hoge Raad vormt de hoogste algemene rechter. Daarnaast kent het bestuursrecht eigen hoogste rechters (Raad van State, Centrale Raad van Beroep, College van Beroep voor het bedrijfsleven). Wanneer citaties voornamelijk van lagere naar hogere instanties lopen, kan dit leiden tot negatieve assortativity op instantietype. Deze analyse maakt inzichtelijk waar de invloed die in DV2 en DV3 wordt gevonden, vandaan komt.
+
+% ============================================================
+\chapter{Dataset en voorbewerking}
+\label{ch:dataset}
+% ============================================================
+
+
+\section{Dataset: LIDO}
+
+De analyse is gebaseerd op de LIDO-dataset (Linked Data Overheid)\footnote{LiDO wordt beheerd door het Kennis- en Exploitatiecentrum Officiële Overheidspublicaties (KOOP) en is beschikbaar onder een CC0-licentie. Datasetbeschrijving: \url{https://data.overheid.nl/dataset/linked-data-overheid}.}, verkregen via begeleider Maarten Marx (Universiteit van Amsterdam). Voor dit onderzoek is gebruikgemaakt van het bestand \texttt{LidoLinks.csv.gz}, een edge-lijst met bron- en doel-URI's van juridische verwijzingen. Het bestand bevat 7.355.861 verwijzingen, verdeeld over jurisprudentie (uitspraken), BWB (Basiswettenbestand, wetsartikelen), CVDR (Centrale Voorziening Decentrale Regelgeving) en EU-bronnen.
+
+
+Voor de netwerkanalyse wordt elke verwijzing opgevat als een gerichte edge van een bron- naar een doel-document. Een verwijzing kan bijvoorbeeld lopen van een uitspraak (\path{jurisprudentie/id/ECLI:NL:...}) naar een wetsartikel (\path{bwb/id/BWBR...}). De verwijzingen zijn automatisch uit documentteksten afgeleid en bevatten uitsluitend informatie over het bestaan van een verwijzing, niet over de inhoudelijke functie ervan. De dataset maakt daardoor geen onderscheid tussen bijvoorbeeld instemmende, onderscheidende of afwijzende citaties. Deze beperking is relevant voor de interpretatie van de resultaten en komt terug in de discussie.
+
+
+\section{Voorbewerking}
+
+De dataset is in een aantal stappen omgezet naar de gerichte jurisprudentie-subgraaf die in de rest van dit onderzoek wordt gebruikt:
+
+\begin{enumerate}
+  \item \textbf{Normalisatie URI's.} BWB-knopen bevatten in hun URI twee datums die in deze analyse niet relevant zijn. Deze zijn weggehaald zodat citaties naar verschillende versies van hetzelfde wetsartikel als dezelfde knoop worden behandeld.
+  \item \textbf{Type-labels.} Per knoop is het documenttype afgeleid uit het URI-prefix (jurisprudentie, BWB, CVDR, EU, etc.) en gebruikt om de jurisprudentie-subgraaf te selecteren.
+  \item \textbf{Afbakening.} Voor alle analyses in dit onderzoek wordt het netwerk beperkt tot edges waarbij zowel bron als doel een uitspraak is (\texttt{ECLI:NL:*}).
+  \item \textbf{Deduplicatie.} Edges met dezelfde bron en hetzelfde doel zijn samengevoegd. Zelfverwijzingen komen 9 keer voor en zijn verwijderd.
+  \item \textbf{Temporele consistentie.} Citaties waarbij de citerende uitspraak ouder is dan de geciteerde uitspraak zijn verwijderd. Dit betreft 130.206 edges (9,62\%), vrijwel volledig geconcentreerd rond een klein aantal recente EHRM-uitspraken die de data vertekenen (zie Sectie~\ref{sec:eda}).
+\end{enumerate}
+
+Tabel~\ref{tab:funnel} laat zien hoe de ruwe dataset via deze stappen wordt teruggebracht tot de uiteindelijke jurisprudentie-subgraaf.
+
+\begin{table}[ht]
+  \centering
+  \caption{Van ruwe LIDO-data naar de jurisprudentie-subgraaf.}
+  \label{tab:funnel}
+  \begin{tabular}{lrr}
+    \toprule
+    Stap & Edges & Knopen \\
+    \midrule
+    Ruwe export (verwijzingen/rijen)                   & 7.355.861 & n.v.t. \\
+    Hele netwerk                                       & 6.917.225 & 1.628.457 \\
+    Alleen jurisprudentie $\rightarrow$ jurisprudentie & 1.353.673 & 674.590 \\
+    Na verwijderen zelfverwijzingen ($-9$)             & 1.353.664 & 674.589 \\
+    Na deduplicatie ($-0$)                             & 1.353.664 & 674.589 \\
+    Na verwijderen temporeel onmogelijke citaties ($-130.206$) & 1.223.458 & 674.589 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+Na voorbewerking bevat de gerichte jurisprudentie-subgraaf 674.589 knopen en 1.223.458 edges. De dichtheid van het netwerk, gedefinieerd voor een gerichte graaf als $\frac{m}{n(n-1)}$ met $n$ knopen en $m$ edges, is $2{,}69 \times 10^{-6}$.
+
+\section{Afgeleide metadata per uitspraak}
+De LIDO-edgelijst bevat zelf alleen bron- en doel-URI's. Voor de analyse is per uitspraak aanvullende metadata gebruikt uit twee bronnen.
+
+Uit de ECLI-string zelf zijn twee velden afgeleid zonder externe bron. Een ECLI heeft de vorm \texttt{ECLI:NL:<instantiecode>:<jaar>:<nummer>}. Uit de instantiecode is het instantietype bepaald (bijvoorbeeld \texttt{HR} voor Hoge Raad, \texttt{RB*} voor rechtbanken, \texttt{GH*} voor gerechtshoven). De mapping naar de zeven hoofdinstanties wordt beschreven in Hoofdstuk~\ref{ch:dv5}. Uit het vierde veld is het jaar van de uitspraak afgeleid.
+
+Het rechtsgebied maakt geen deel uit van de LIDO-edgelijst zelf. De rechtsgebiedlabels per uitspraak zijn als aanvullende export uit de LIDO-data ter beschikking gesteld door de begeleider. Voor dit onderzoek is deze volledige export gebruikt, zodat het rechtsgebied voor vrijwel alle uitspraken beschikbaar is. De exacte dekking en de opschoning van de ruwe labels worden in Hoofdstuk~\ref{ch:dv4} beschreven. Per uitspraak zijn dus de ECLI, het instantietype, het jaar en het rechtsgebied beschikbaar.
+
+
+De jaren lopen uiteen van 1862 tot 2024; de beschrijvende statistiek van de jaarverdeling staat in Tabel~\ref{tab:dv3-jaar}. Figuur~\ref{fig:jaar-verdeling} toont het aantal uitspraken per jaar.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{jaar_verdeling2.png}
+  \caption{Aantal uitspraken in de jurisprudentie-subgraaf per jaar (ECLI-jaar, $n = 662.777$).}
+  \label{fig:jaar-verdeling}
+\end{figure}
+
+\subsection{Het Parket bij de Hoge Raad als bijzonder geval}
+Bij een eerste verkenning van de data valt één instantietype op dat zich structureel anders gedraagt dan de overige. Het Parket bij de Hoge Raad (PHR) publiceert conclusies: juridische adviezen die voorafgaan aan een uitspraak van de Hoge Raad. Een conclusie haalt standaard een groot aantal eerdere uitspraken van de Hoge Raad tegelijk aan, als overzicht van de stand van de rechtspraak. Een PHR-knoop heeft daardoor een zeer hoge uitgaande graad. De betekenis van een uitgaande PHR-citatie verschilt bovendien van die van een gewone precedentverwijzing tussen twee uitspraken: het gaat niet om een verwijzing naar één specifiek precedent, maar om een bespreking van een grotere groep relevante uitspraken binnen een bepaalde rechtslijn.
+
+Deze eigenschap maakt het verschil tussen een link \emph{naar} het PHR en een link \emph{vanuit} het PHR inhoudelijk relevant. Citaties vanuit het PHR vertekenen vooral richtinggevoelige invloedmaten, omdat zij in grote aantallen en gericht op de Hoge Raad voorkomen. Dit effect is zichtbaar in de citatieflow tussen instanties (Hoofdstuk~\ref{ch:dv5}), waar de kolom en rij van het PHR sterk afwijken van de andere instanties, en het verklaart het afwijkende gedrag van HITS-authority dat in Hoofdstuk~\ref{ch:dv2} wordt beschreven. Het PHR wordt in dit onderzoek niet uit de subgraaf verwijderd, omdat de conclusies onderdeel zijn van de gepubliceerde jurisprudentie, maar bij de interpretatie van de resultaten wordt rekening gehouden met dit bijzondere karakter.
+
+
+\subsection{Temporeel onmogelijke citaties en EHRM-verwijzingen}
+\label{sec:eda}
+Een tweede verkenning van de citatierichting laat een probleem in de data zien. Een citatie loopt per definitie van een latere uitspraak naar een eerdere: een uitspraak kan niet verwijzen naar een uitspraak die later is gepubliceerd. In de subgraaf zijn echter 130.206 citaties (9,62\%) aanwezig waarbij de citerende uitspraak ouder is dan de geciteerde uitspraak. Deze temporeel onmogelijke citaties zijn sterk geconcentreerd rond een klein aantal uitspraken, voornamelijk recente uitspraken van het Europees Hof voor de Rechten van de Mens (EHRM, met ECLI-prefix \texttt{ECLI:CE:ECHR:}) uit 2022 tot 2024. De meest opvallende knoop is een EHRM-committeezaak uit oktober 2023 over detentievervoer. Deze uitspraak heeft 21.160 inkomende citaties, waarvan 18.136 (86\%) afkomstig zijn van uitspraken die vóór de uitspraakdatum zijn gepubliceerd. De oudste daarvan dateert uit 1882.
+
+De jaar- en instantieverdeling van deze citerende uitspraken komt sterk overeen met die van het volledige netwerk. Dit wijst erop dat deze EHRM-uitspraken niet als gewone uitspraken functioneren, maar als verzamelpunt voor verwijzingen die waarschijnlijk betrekking hebben op het EVRM in bredere zin. Omdat deze edges de invloedmaten vertekenen en vooral HITS-authority sterk beïnvloeden, zijn alle temporeel onmogelijke citaties uit de subgraaf verwijderd (zie de voorbewerkingsstap in Tabel~\ref{tab:funnel}). Alle analyses in de volgende hoofdstukken draaien op de opgeschoonde subgraaf.
+
+
+
+\section{Reproduceerbaarheid}
+
+De volledige verwerking en analyse is uitgevoerd in een Jupyter-notebook in Python 3.13.9. Het notebook is samen met de overige bestanden beschikbaar via de GitHub-repository \url{https://github.com/vinwiegman/thesis-project}. De belangrijkste gebruikte pakketten en versies staan in Tabel~\ref{tab:packages}.
+
+\begin{table}[H]
+  \centering
+  \caption{Gebruikte Python-pakketten.}
+  \label{tab:packages}
+  \begin{tabular}{ll}
+    \toprule
+    Pakket & Versie \\
+    \midrule
+    pandas              & 2.3.3 \\
+    numpy               & 2.3.5 \\
+    networkx            & 3.5 \\
+    python-igraph       & 1.0.0 \\
+    leidenalg           & 0.11.0 \\
+    powerlaw            & 2.0.0 \\
+    scipy               & 1.16.3 \\
+    matplotlib          & 3.10.6 \\
+    seaborn             & 0.13.2 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+
+% ============================================================
+\chapter{Macrostructuur van het netwerk (DV 1)}
+\label{ch:dv1}
+% ============================================================
+
+Voordat invloed binnen het netwerk kan worden gemeten, moet de globale structuur ervan in beeld worden gebracht. \textcite{broder2000} toonden aan dat het World Wide Web een bow-tie-structuur heeft met een centrale SCC van ongeveer 28\% van de knopen. Voor citatienetwerken is het onduidelijk in hoeverre deze structuur toepasbaar is: citaties verwijzen in principe altijd naar eerdere uitspraken, waardoor de SCC klein zou moeten zijn. Tegelijk is bekend dat samenhangende verwijzingen, bijvoorbeeld tussen een conclusie van het Parket en de daaropvolgende uitspraak van de Hoge Raad, wel cyclische verbanden kunnen creëren. De k-core-analyse \parencite{seidman1983, carmi2007} bekijkt een andere vorm van structuur dan de bow-tie analyse. Waar de bow-tie rekening houdt met de richting van citaties, bekijkt k-core alleen de onderlinge verbondenheid van uitspraken. Dit meet de ongerichte verbondenheid van het netwerk en kan dus een ander deel van het netwerk als ``kern'' identificeren dan een directionele maat.
+
+
+\section{Methode}
+
+Alle analyses voor DV1 worden uitgevoerd op de jurisprudentie-subgraaf $G$ (zie Hoofdstuk~\ref{ch:dataset}), waarin een knoop een uitspraak is en een gerichte edge $u \rightarrow v$ aangeeft dat uitspraak $u$ uitspraak $v$ citeert. De analyse bestaat uit drie complementaire onderdelen: componentenanalyse, bow-tie-decompositie en k-core-decompositie. De eerste twee houden rekening met de richting van citaties, de derde bekijkt de ongerichte verbondenheid.
+
+
+\subsection{Componentenanalyse} Het netwerk wordt eerst opgedeeld in zwakke en sterke componenten. Een zwakke component (WCC) is een maximale verzameling knopen die onderling verbonden is wanneer de richting van de edges wordt genegeerd; een sterke component (SCC) is een maximale verzameling knopen waarin elke knoop elke andere knoop via gerichte paden kan bereiken. Beide worden berekend met \texttt{networkx} (\texttt{weakly\_connected\_components} en \texttt{strongly\_connected\_components}). Voor elke decompositie worden het aantal componenten, de grootte van de grootste component (absoluut en als fractie van het netwerk) en het aantal singletons (componenten die bestaan uit een enkele knoop) gerapporteerd. Voor de grootste SCC wordt daarnaast de instantieverdeling bepaald op basis van de ECLI-prefix, om te zien welke instanties de cyclische kern vormen. Omdat juridische citaties in principe naar het verleden wijzen, is de verwachting dat het netwerk vrijwel acyclisch is en dat de SCC's daardoor heel klein zijn (voornamelijk singletons), terwijl de WCC-analyse laat zien hoe samenhangend het netwerk als geheel is.
+
+
+
+\subsection{Bow-tie-decompositie} De bow-tie-decompositie \parencite{broder2000} verdeelt een gericht netwerk in regio's op basis van hun relatie tot de centrale SCC. De analyse wordt beperkt tot de grootste WCC, en de grootste SCC daarbinnen wordt als centrale kern genomen. Vervolgens worden de overige knopen ingedeeld op basis van hun bereikbaarheid met de SCC:
+
+\begin{itemize}
+  \item \textbf{IN}: knopen die de SCC kunnen bereiken maar er zelf niet in zitten;
+  \item \textbf{OUT}: knopen die vanuit de SCC bereikbaar zijn;
+  \item \textbf{TENDRILS\_IN}: knopen die vanuit IN bereikbaar zijn maar de SCC niet bereiken;
+  \item \textbf{TENDRILS\_OUT}: knopen die OUT bereiken maar zelf niet vanuit de SCC bereikbaar zijn;
+  \item \textbf{TUBES}: knopen die een verbinding vormen tussen IN en OUT zonder door de SCC te lopen;
+  \item \textbf{OTHER}: overige knopen binnen de grootste WCC die niet tot een van bovenstaande categorieën behoren.
+\end{itemize}
+
+Per regio worden het aantal knopen en het aandeel ten opzichte van zowel de grootste WCC als het volledige netwerk gerapporteerd. De relatieve omvang van de SCC wordt vergeleken met de ongeveer 28\% die \textcite{broder2000} voor het World Wide Web vonden, om te onderzoeken in hoeverre de structuur van het jurisprudentienetwerk afwijkt van die van het World Wide Web.
+
+\subsection{k-core-decompositie} De k-core-decompositie \parencite{seidman1983, carmi2007} wordt toegepast op de ongerichte projectie van $G$, omdat deze maat de lokale dichtheid van verbindingen meet los van de richting van citaties. De $k$-core is de maximale deelgraaf waarin elke knoop minstens graad $k$ heeft binnen die deelgraaf. Het core-nummer van een knoop is de hoogste $k$ waarvoor de knoop nog tot de $k$-core behoort. De core-nummers worden berekend met \texttt{networkx} (\texttt{core\_number}), dat iteratief knopen met graad lager dan $k$ verwijdert. Gerapporteerd worden de volledige verdeling van core-nummers (aantal knopen per $k$ en cumulatief), de maximale $k$, en de samenstelling van de binnenste k-core naar instantietype. Doordat k-core een ander, ongericht aspect van de structuur meet dan de bow-tie, kan deze analyse een ander deel van het netwerk als dichte kern aanwijzen dan de directionele componentenanalyse.
+
+
+
+\section{Resultaten}
+
+\subsection{Componentenanalyse} 
+De jurisprudentie-subgraaf telt 93.587 zwakke componenten (WCC's) (Tabel~\ref{tab:dv1-componenten}). De grootste WCC omvat 496.679 knopen (73,63\% van het netwerk). De tweede WCC bevat slechts 33 knopen en de rest van de zwakke componenten zijn nog kleiner. Daarnaast zijn 23.182 knopen na de opschoning geïsoleerd geraakt, omdat zij alleen via temporeel onmogelijke citaties verbonden waren. De decompositie in sterke componenten (SCC's) geeft een heel ander beeld: 612.286 SCC's waarvan er 551.068 uit één knoop bestaan. De grootste SCC bevat slechts 26 knopen (0,0039\% van het netwerk) en de tweede grootste 15 knopen. De grootste SCC bestaat uit een lokale cluster van de Rechtbank Zeeland-West-Brabant (RBZWB: 25) met één gerechtshof (GHSHE: 1) (Tabel~\ref{tab:dv1-scc-instanties}).
+
+Figuur~\ref{fig:dv1-wcc-loglog} toont de grootteverdeling van de zwakke componenten op log-log-schaal. Het netwerk bevat één zeer grote component, terwijl daarnaast een groot aantal kleine componenten voorkomt. Het aantal componenten neemt snel af naarmate de componentgrootte toeneemt.
+
+
+\begin{table}[ht]
+  \centering
+  \caption{Zwakke (WCC) en sterke (SCC) componenten van de jurisprudentie-subgraaf.}
+  \label{tab:dv1-componenten}
+  \begin{tabular}{lrr}
+    \toprule
+     & WCC & SCC \\
+    \midrule
+    Aantal componenten      & 93.587   & 612.286 \\
+    Grootste component      & 496.679  & 26 \\
+    \quad (\% van netwerk)  & 73,63\%  & 0,0039\% \\
+    Tweede grootste         & 33       & 15 \\
+    Aantal singletons       & 23.182   & 551.068 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \centering
+  \caption{Instantieverdeling van de grootste SCC (26 knopen) na opschoning.}
+  \label{tab:dv1-scc-instanties}
+  \begin{tabular}{lr}
+    \toprule
+    Instantie (ECLI-code) & Aantal \\
+    \midrule
+    RBZWB & 25 \\
+    GHSHE & 1 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{wcgrootte2.png}
+  \caption{WCC-grootteverdeling (log-log).}
+  \label{fig:dv1-wcc-loglog}
+\end{figure}
+
+
+\subsection{Bow-tie-decompositie} 
+De bow-tie-decompositie (Tabel~\ref{tab:dv1-bowtie}) bevestigt het sterk acyclische karakter van het netwerk. De grootste SCC bevat 26 knopen, maar ligt buiten de grootste WCC. Binnen de grootste WCC vormt een cluster van 15 knopen de grootste sterke component, die als kern van de bow-tie-analyse wordt gebruikt. De IN-component telt 150 knopen en de OUT-component 11.279. De tendrils domineren: TENDRILS\_IN bevat 25.587 knopen (3,79\% van het netwerk) en TENDRILS\_OUT 169.163 knopen (25,08\%). Er zijn geen tubes gevonden. De grootste categorie is OTHER met 290.485 knopen (43,06\%): knopen die binnen de grootste WCC liggen maar geen pad van of naar de SCC hebben. Daarnaast staan 177.910 knopen (26,37\%) volledig buiten de grootste WCC.
+
+ 
+
+\begin{table}[ht]
+  \centering
+  \caption{Bow-tie-decompositie van de jurisprudentie-subgraaf.}
+  \label{tab:dv1-bowtie}
+  \begin{tabular}{lrrr}
+    \toprule
+    Regio & Knopen & \% WCC & \% netwerk \\
+    \midrule
+    SCC            & 15      & 0,00   & 0,00 \\
+    IN             & 150     & 0,03   & 0,02 \\
+    OUT            & 11.279  & 2,27   & 1,67 \\
+    TENDRILS\_IN   & 25.587  & 5,15   & 3,79 \\
+    TENDRILS\_OUT  & 169.163 & 34,06  & 25,08 \\
+    TUBES          & 0       & 0,00   & 0,00 \\
+    OTHER          & 290.485 & 58,49  & 43,06 \\
+    \midrule
+    Totaal WCC     & 496.679 & 100,00 & 73,63 \\
+    Buiten WCC     & 177.910 & n.v.t. & 26,37 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\subsection{k-core-decompositie} Op de ongerichte projectie van de subgraaf is de maximale k-core k=19. De distributie loopt steil af: 368.465 knopen hebben core-nummer 1 en ruim 58\% van het netwerk valt weg na het verwijderen van knopen met core-nummer 1 of lager. Het aantal componenten binnen de $k$-core neemt bovendien snel af (Tabel~\ref{tab:dv1-kcore-dist}). Bij $k = 1$ telt het netwerk 70.405 losse componenten, maar vanaf $k \geq 3$ blijven er nog maar 127 over en vanaf $k \geq 6$ minder dan tien. De binnenste k-core bevat 109 knopen en heeft een opvallende instantieverdeling: de kern wordt gedomineerd door rechtbanken (RBOVE: 22, RBGEL: 15, RBOBR: 15, RBROT: 8, RBDHA: 8, RBZWB: 7), met daarnaast 10 Hoge Raad-uitspraken en enkele gerechtshoven (GHARL, GHAMS, GHSHE; Tabel~\ref{tab:dv1-kcore-instanties}). Hogere bestuursrechters (RvS, CRvB, CBb) ontbreken in deze kern.
+
+
+
+\begin{table}[H]
+  \centering
+  \caption{Verdeling van core-nummers (k-core) op de ongerichte jurisprudentie-subgraaf. De laatste kolom geeft het aantal samenhangende componenten waarin de $k$-core (knopen met core-nummer $\geq k$) uiteenvalt.}
+  \label{tab:dv1-kcore-dist}
+  \begin{tabular}{rrrr}
+    \toprule
+    $k$ & Aantal knopen & Cumulatief & Componenten in $k$-core \\
+    \midrule
+    0  & 23.182  & 674.589 & 93.587 \\
+    1  & 368.465 & 651.407 & 70.405 \\
+    2  & 121.454 & 282.942 & 1.193 \\
+    3  & 66.864  & 161.488 & 127 \\
+    4  & 38.399  & 94.624  & 36 \\
+    5  & 22.764  & 56.225  & 16 \\
+    6  & 15.822  & 33.461  & 9 \\
+    7  & 10.306  & 17.639  & 4 \\
+    8  & 3.549   & 7.333   & 3 \\
+    9  & 1.532   & 3.784   & 3 \\
+    10 & 884     & 2.252   & 3 \\
+    11 & 426     & 1.368   & 3 \\
+    12 & 443     & 942     & 6 \\
+    13 & 262     & 499     & 5 \\
+    14 & 79      & 237     & 2 \\
+    15 & 21      & 158     & 1 \\
+    16 & 25      & 137     & 1 \\
+    17 & 2       & 112     & 1 \\
+    18 & 1       & 110     & 1 \\
+    19 & 109     & 109     & 1 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Instantieverdeling van de binnenste k-core ($k=19$, 109 knopen).}
+  \label{tab:dv1-kcore-instanties}
+  \begin{tabular}{lr}
+    \toprule
+    Instantie (ECLI-code) & Aantal \\
+    \midrule
+    RBOVE & 22 \\
+    RBGEL & 15 \\
+    RBOBR & 15 \\
+    HR    & 10 \\
+    RBROT & 8 \\
+    RBDHA & 8 \\
+    RBZWB & 7 \\
+    RBMNE & 6 \\
+    RBNHO & 5 \\
+    RBLIM & 4 \\
+    GHARL & 3 \\
+    GHAMS & 3 \\
+    RBAMS & 2 \\
+    GHSHE & 1 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+De binnenste k-core wordt door rechtbanken gedomineerd, met slechts tien Hoge Raad-uitspraken en geen enkele Parket-conclusie. Dit verschil is te verklaren doordat de k-core-decompositie op een ongerichte graaf wordt toegepast en daardoor de lokale dichtheid van verbindingen meet zonder rekening te houden met de richting van citaties. Rechtbanken citeren in absolute aantallen veel andere rechtbanken, vooral binnen hetzelfde rechtsgebied, en deze onderlinge verwijzingen vormen in de ongerichte projectie een dicht verbonden kern. Dat de hogere bestuursrechters (RvS, CRvB, CBb) hier ontbreken terwijl zij in de bow-tie-analyse en in absolute citaties juist sterk vertegenwoordigd zijn, laat zien dat de binnenste k-core niet de meest geciteerde instanties bevat, maar de instanties met de dichtste onderlinge verwevenheid.
+
+
+\section{Interpretatie}
+De macrostructuur van het Nederlandse jurisprudentienetwerk verschilt sterk van die van het World Wide Web. Waar de SCC in het WWW ongeveer 28\% van het netwerk omvat \parencite{broder2000}, bevat de grootste SCC in deze subgraaf na opschoning slechts 26 knopen (0,004\%). Dit komt overeen met de verwachting: juridische citaties wijzen in principe altijd naar het verleden, waardoor wederzijdse verwijzingen tussen uitspraken zeldzaam zijn. Veel van de cyclische structuur die vóór de opschoning zichtbaar was, met name een kern van Hoge Raad-uitspraken en Parket-conclusies, bleek te berusten op temporeel onmogelijke citaties (Sectie~\ref{sec:eda}). Na verwijdering daarvan resteert alleen een kleine, lokale cluster van de Rechtbank Zeeland-West-Brabant, vermoedelijk uitspraken uit hetzelfde jaar die naar elkaar verwijzen.
+
+De afwezigheid van een grote SCC betekent niet dat het netwerk fragmentarisch is: 73,6\% van de knopen ligt in één grote zwakke component. Het netwerk is dus samenhangend, maar vrijwel acyclisch. Dat is precies wat je van een tijdgeordend citatienetwerk verwacht: de uitspraken zijn onderling sterk verbonden, maar die verbindingen wijzen vrijwel altijd één kant op, van een nieuwere naar een oudere uitspraak. Daardoor ontstaan nauwelijks gerichte cycli en blijven de sterke componenten klein, terwijl het netwerk als geheel samenhangend blijft. De meeste uitspraken citeren dus wel, maar maken geen deel uit van wederkerige citatierelaties.
+
+Dat de binnenste k-core ($k = 19$, 109 knopen) wordt gedomineerd door rechtbanken en niet door de Hoge Raad of de hogere bestuursrechters, laat zien dat de dichtste onderlinge verwevenheid niet bij de meest geciteerde instanties zit, maar bij groepen uitspraken die elkaar intensief en wederzijds citeren, vermoedelijk binnen hetzelfde rechtsgebied.
+
+
+% ============================================================
+\chapter{Verdeling van invloed (DV 2)}
+\label{ch:dv2}
+% ============================================================
+
+Eerdere studies naar juridische citatienetwerken concentreren zich op het identificeren van invloedrijke uitspraken met behulp van centraliteitsmaten zoals in-degree, PageRank \parencite{brin1998, winkels2012} en de importance scores van \textcite{fowler2007}. Wat in de literatuur opvalt is dat de keuze van maat de uitkomst sterk be\"invloedt \parencite{fowler2008, vanopijnen2012}. Deze deelvraag richt zich daarom niet op het kiezen van de ``beste'' maat, maar op de verdeling die elke maat oplevert: hoe sterk is invloed geconcentreerd, en heeft de staart van de verdeling de power-law-vorm die in veel netwerkliteratuur wordt verwacht? \textcite{broido2019} lieten zien dat strikte schaalvrije netwerken zeldzamer zijn dan vaak wordt aangenomen en dat log-normale verdelingen vaak even goed of zelfs beter bij de data passen.
+
+
+\section{Methode}
+
+Voor DV2 worden drie invloedmaten berekend op de gerichte jurisprudentie-subgraaf $G$, waarna voor elke maat de verdeling, de concentratie en de vorm van de staart worden geanalyseerd. De MARC-in-degree is een schaalvariant van de in-degree en wordt vooral in de concentratieanalyse meegenomen.
+
+\subsection{Invloedmaten}
+
+\begin{itemize}
+  \item \emph{In-degree}: het aantal inkomende citaties per uitspraak, berekend met \texttt{G.in\_degree()}. Dit is de eenvoudigste invloedmaat en behandelt alle citaties als gelijkwaardig.
+  \item \emph{MARC-in-degree} \parencite{vanopijnen2012}: de logaritmisch geschaalde variant $M_i = 1 + \log_2(C_i)$, waarin $C_i$ de in-degree van uitspraak $i$ is. Van Opijnen merkt deze maat aan als de meest geschikte citatiemaat voor juridische relevantie, omdat de logaritmische schaal de invloed van uitschieters dempt. Omdat $M_i$ een monotone transformatie van de in-degree is, levert deze maat dezelfde rangschikking van uitspraken op als de gewone in-degree. Het verschil tussen de twee maten zit uitsluitend in de schaal en daarmee in de concentratie van de verdeling.
+  \item \emph{PageRank} \parencite{brin1998}, berekend met \texttt{nx.pagerank(G, alpha=0.85)}. PageRank weegt een citatie naar de invloed van de citerende uitspraak en is gedefinieerd als
+  \[
+    PR(u) = \frac{1-d}{N} + d \sum_{v \in B_u} \frac{PR(v)}{L(v)},
+  \]
+  waarin $N$ het aantal knopen is, $B_u$ de verzameling uitspraken die $u$ citeren, $L(v)$ het aantal uitgaande citaties van $v$, en $d = 0{,}85$ de dempingsfactor.
+  \item \emph{HITS-authority} \parencite{kleinberg1999}, berekend met \texttt{nx.hits(G, max\_iter=200, tol=1e-6)}. HITS kent iteratief hub- en authority-scores toe, waarbij een goede authority wordt geciteerd door goede hubs en een goede hub naar goede authorities verwijst:
+  \[
+    a(u) = \sum_{v \rightarrow u} h(v), \qquad h(u) = \sum_{u \rightarrow v} a(v).
+  \]
+  De hub- en authority-scores worden iteratief bijgewerkt totdat de waarden stabiliseren. In dit onderzoek wordt de authority-score als kandidaat-invloedmaat geanalyseerd: uit de resultaten volgt dat deze beter als diagnostische maat kan worden opgevat.
+\end{itemize}
+
+
+\subsection{Concentratie en ongelijkheid} Voor elke maat worden het gemiddelde en de mediaan gerapporteerd, samen met de concentratie aan de top: het aandeel van de totale massa dat door de top-1\%, top-5\% en top-10\% van de uitspraken wordt opgenomen. De ongelijkheid van de verdeling wordt samengevat met de Gini-coëfficiënt,
+\[
+  \mathit{Gini} = \frac{2 \sum_{i=1}^{n} i\, x_{(i)}}{n \sum_{i=1}^{n} x_i} - \frac{n+1}{n},
+\]
+waarin $x_{(i)}$ de oplopend gesorteerde waarden zijn. De Gini loopt van $0$ (volledig gelijk verdeeld) tot $1$ (maximaal ongelijk). De verdelingen worden daarnaast weergegeven in log-log-histogrammen.
+
+
+\subsection{Power-law-fits} Om te toetsen of de staart van elke verdeling een power-law-vorm $P(k) \propto k^{-\alpha}$ heeft, wordt de procedure van \textcite{clauset2009} gevolgd, ge\"implementeerd met de \texttt{powerlaw}-bibliotheek. Per maat wordt de exponent $\alpha$ via maximum likelihood geschat en wordt de ondergrens $x_{\min}$ gekozen die de Kolmogorov-Smirnov-afstand tussen data en fit minimaliseert (continue fit, \texttt{discrete=False}). Een rechte lijn in een log-log-plot is echter geen voldoende bewijs voor een power-law \parencite{broido2019}. Daarom wordt het power-law-model met een likelihood ratio test (\texttt{distribution\_compare}, \texttt{normalized\_ratio=True}) vergeleken met drie alternatieve verdelingen: log-normaal, exponentieel en stretched exponential. De genormaliseerde log-likelihood ratio $R$ geeft aan welk model beter past ($R > 0$ in het voordeel van power-law, $R < 0$ in het voordeel van het alternatief) en $p$ geeft de significantie van dat verschil. Een power-law wordt alleen aangenomen wanneer deze niet door een alternatief model wordt verslagen. Ten slotte wordt per maat de complementaire cumulatieve verdelingsfunctie (CCDF) samen met de gefitte power-law geplot.
+
+
+\section{Resultaten}
+Tabel~\ref{tab:dv2-describe} vat de drie invloedmaten samen. De gemiddelde in-degree is laag (1,8) met een mediaan van 1, terwijl het maximum oploopt tot 5.365 ontvangen citaties. De grote standaarddeviatie (15,9) bevestigt de sterke scheefheid van de verdeling. PageRank en HITS-authority hebben door hun normalisatie zeer kleine gemiddelde waarden, maar ook hier ligt het maximum ver boven de mediaan. De scheefheid is daarbij het sterkst voor HITS-authority.
+
+
+\begin{table}[ht]
+  \centering
+  \caption{Beschrijvende statistiek van de drie invloedmaten over alle 674.589 knopen.}
+  \label{tab:dv2-describe}
+  \begin{tabular}{lrrr}
+    \toprule
+     & In-degree & PageRank & HITS-authority \\
+    \midrule
+    Gemiddelde & 1,814            & $1{,}482\times10^{-6}$ & $1{,}482\times10^{-6}$ \\
+    Mediaan    & 1                & $8{,}221\times10^{-7}$ & $\approx 0$ \\
+    Std        & 15,887           & $7{,}371\times10^{-6}$ & $2{,}743\times10^{-4}$ \\
+    Maximum    & 5.365            & $3{,}022\times10^{-3}$ & $0{,}2211$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\subsection{Concentratie en ongelijkheid} De invloedmaten vertonen sterk scheve verdelingen, maar in verschillende maten. Voor in-degree geldt een Gini-coëfficiënt van 0,772, met de top-1\% van uitspraken die 36,0\% van alle citaties ontvangt en de top-10\% 67,9\%. De MARC-in-degree van \textcite{vanopijnen2012} vlakt deze concentratie sterk af: door de logaritmische schaal daalt de Gini naar 0,586 en ontvangt de top-1\% nog maar 6,8\% van de totale massa. PageRank is eveneens minder ongelijk verdeeld dan de in-degree (Gini 0,447; top-1\% 19,1\%; top-10\% 40,0\%). HITS-authority laat juist een veel extremere concentratie zien (Gini 0,994): de top-1\% van uitspraken bevat 93,0\% van alle authority en de top-10\% 99,9\%. De rest van het netwerk heeft praktisch geen authority. Tabel~\ref{tab:dv2-gini} vat de Gini-coëfficiënt en de concentratie aan de top voor de vier maten samen.
+
+\begin{table}[ht]
+  \centering
+  \caption{Ongelijkheid (Gini) en concentratie aan de top per invloedmaat.}
+  \label{tab:dv2-gini}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Maat & Gini & top-1\% & top-5\% & top-10\% \\
+    \midrule
+    In-degree      & 0,772 & 0,360 & 0,577 & 0,679 \\
+    MARC-in-degree & 0,586 & 0,068 & 0,243 & 0,393 \\
+    PageRank       & 0,447 & 0,191 & 0,317 & 0,400 \\
+    HITS-authority & 0,994 & 0,930 & 0,995 & 0,999 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{verdelingen2.png}
+  \caption{Verdeling van in-degree, PageRank en HITS-authority (log-log histogrammen).}
+  \label{fig:dv2-verdelingen}
+\end{figure}
+
+
+De log-log-histogrammen (Figuur~\ref{fig:dv2-verdelingen}) laten deze verschillen ook zien. De in-degree-verdeling neemt vrijwel gelijk af, wat past bij een mogelijke power-law-vorm waarin een klein aantal uitspraken zeer vaak wordt geciteerd. PageRank vertoont een nog gelijkmatigere afname. De authority-verdeling wijkt sterk af van de andere twee: in plaats van een vrijwel monotone afname heeft de verdeling meerdere pieken, met een eerste piek bij extreem lage waarden en een tweede, bredere piek die het grootste deel van de massa bevat.
+
+\subsection{Power-law-fits} 
+Volgens de procedure van \textcite{clauset2009} is voor elke maat een power-law op de staart gefit (Tabel~\ref{tab:dv2-powerlaw}). De geschatte exponenten liggen dicht bij elkaar en in het bereik dat voor citatienetwerken gebruikelijk is: $\alpha = 2{,}47$ voor in-degree, $2{,}37$ voor PageRank en $2{,}27$ voor HITS-authority.
+ 
+
+\begin{table}[H]
+  \centering
+  \caption{Power-law-fits \parencite{clauset2009} en likelihood ratio tests tegen alternatieve verdelingen. $R>0$ duidt op betere fit van power-law, $R<0$ op betere fit van het alternatief en $p$ is de bijbehorende significantie.}
+  \label{tab:dv2-powerlaw}
+  \footnotesize
+  \begin{tabular}{llrrrr}
+    \toprule
+    Maat & Vergelijking & $\alpha$ & $x_{\min}$ & $R$ & $p$ \\
+    \midrule
+    In-degree & power\_law vs lognormal             & 2,473 & 40 & $-0{,}330$ & 0,742 \\
+    In-degree & power\_law vs exponential           & 2,473 & 40 & $+8{,}403$ & 0,000 \\
+    In-degree & power\_law vs stretched\_exponential & 2,473 & 40 & $+2{,}019$ & 0,043 \\
+    \midrule
+    PageRank & power\_law vs lognormal             & 2,370 & $\approx 0$ & $-1{,}416$ & 0,157 \\
+    PageRank & power\_law vs exponential           & 2,370 & $\approx 0$ & $+15{,}025$ & 0,000 \\
+    PageRank & power\_law vs stretched\_exponential & 2,370 & $\approx 0$ & $+3{,}928$ & 0,000 \\
+    \midrule
+    HITS-authority & power\_law vs lognormal             & 2,272 & $2\times10^{-4}$ & $+0{,}124$ & 0,902 \\
+    HITS-authority & power\_law vs exponential           & 2,272 & $2\times10^{-4}$ & $+2{,}260$ & 0,024 \\
+    HITS-authority & power\_law vs stretched\_exponential & 2,272 & $2\times10^{-4}$ & $+0{,}890$ & 0,373 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+De likelihood ratio geven een gemengd beeld. Tegen het exponentiële model wint de power-law voor alle drie de maten duidelijk ($R = +8{,}40$ voor in-degree, $+15{,}03$ voor PageRank en $+2{,}26$ voor authority; alle $p < 0{,}05$). Tegen de log-normale verdeling is de uitkomst voor in-degree en PageRank licht negatief ($R = -0{,}33$ en $-1{,}42$) en voor authority licht positief ($R = +0{,}12$), maar in alle drie de gevallen niet significant ($p > 0{,}15$). Voor in-degree en PageRank past de log-normale verdeling dus minstens even goed als de power-law. Voor HITS-authority wijst de toets de power-law nominaal als best passende verdeling aan, ook tegenover de stretched exponential ($R = +0{,}89$), maar dat voordeel is alleen tegenover de exponentiële verdeling significant en niet tegenover de log-normale of stretched exponential ($p = 0{,}90$ en $p = 0{,}37$). De data ondersteunen daarmee wel een verdeling met een zware staart, maar geven voor geen van de maten een duidelijke voorkeur voor een power-law boven de alternatieven.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{ccdf2.png}
+  \caption{CCDF van in-degree, PageRank en HITS-authority met bijbehorende power-law-fit.}
+  \label{fig:dv2-ccdf}
+\end{figure}
+
+De CCDF-plots (Figuur~\ref{fig:dv2-ccdf}) tonen voor elke maat de staart met de bijbehorende power-law-fit. In-degree en PageRank volgen hun fit over een groot bereik, al laten de likelihood-ratio-tests zien dat een log-normale verdeling hun staart nog iets beter beschrijft. De authority-staart bestaat uit slechts een klein aantal knopen, de kleine kern van standaardarresten die in de volgende paragraaf wordt besproken, zodat de fit op weinig waarnemingen berust en de tests hier geen voorkeur tussen de modellen geven.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{lognormaal2.png}
+  \caption{Verdeling van in-degree, PageRank en HITS-authority op een logaritmische x-as, met de best passende log-normale dichtheid (rode lijn).}
+  \label{fig:dv2-lognormaal}
+\end{figure}
+
+Omdat de likelihood ratio tests de log-normale verdeling als even goed passend alternatief voor de power-law aanwijzen, is per maat ook de log-normale fit zelf weergegeven (Figuur~\ref{fig:dv2-lognormaal}). De verdeling staat op een logaritmische x-as, met de best passende log-normale dichtheid in rood. Het beeld is gemengd. Voor in-degree en PageRank vangt de log-normale curve de globale ligging en de aflopende staart, maar deze blijft ver onder de scherpe piek bij de laagste waarde, waar het grootste deel van de massa zit. Voor HITS-authority sluit de log-normale verdeling minder goed aan. De verdeling is door de extreme concentratie sterk onregelmatig, waardoor de log-normale curve de werkelijke vorm niet volgt. Dat wijst op de afwijkende structuur van authority die in de volgende paragraaf wordt verklaard. De log-normale fit is daarmee vooral een benadering van de staart en geen sluitende beschrijving van de volledige verdeling.
+
+
+\subsection{HITS-authority: de kern van standaardarresten}
+De authority-verdeling is met een Gini van 0,994 nog schever dan in-degree of PageRank, en die concentratie vraagt om uitleg. HITS gaat ervan uit dat goede authorities herkenbaar zijn doordat goede hubs ernaar verwijzen, en omgekeerd \parencite{kleinberg1999}. Op dit netwerk wijst die wederzijdse versterking een kleine, herkenbare kern aan.
+
+Een inspectie van de top-authority-knopen laat zien om welke uitspraken het gaat (Tabel~\ref{tab:dv2-authority}). De hoogste authority ligt bij één standaardarrest van de Hoge Raad (\texttt{ECLI:NL:HR:1981:AG4158}, het Haviltex-arrest, het leidende arrest over contractuitleg), met een score die ongeveer zeven keer zo hoog is als die van de nummer twee. De rest van de top bestaat vrijwel volledig uit arresten van de Hoge Raad: van de top-100 authorities zijn er 92 van de Hoge Raad, 7 van het EHRM of buitenlandse hoven en 1 van het Parket. In de top-1000 zijn dat er 860 van de Hoge Raad. Authority concentreert zich dus op een kleine kern van standaardarresten van de Hoge Raad. Dat juist een breed bekend standaardarrest bovenaan staat, geeft aan dat de maat na opschoning inhoudelijk betekenisvolle uitspraken aanwijst en niet langer door een fout in de data wordt vertekend.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{De tien uitspraken met de hoogste HITS-authority-score na opschoning. De top bestaat vrijwel volledig uit standaardarresten van de Hoge Raad.}
+  \label{tab:dv2-authority}
+  \begin{tabular}{lrrl}
+    \toprule
+    Uitspraak (ECLI:\ldots) & Authority & In-degree & Instantie \\
+    \midrule
+    NL:HR:1981:AG4158             & 0,2211 & 5.365 & HR \\
+    NL:HR:2004:AO1427             & 0,0313 & 901   & HR \\
+    NL:HR:2007:AZ3178             & 0,0127 & 312   & HR \\
+    NL:HR:2007:BA4909             & 0,0118 & 263   & HR \\
+    NL:HR:2022:853                & 0,0106 & 2.745 & HR \\
+    NL:HR:2013:BY8101             & 0,0104 & 322   & HR \\
+    CE:ECHR:2023:1026JUD003380319 & 0,0083 & 3.024 & EHRM \\
+    NL:HR:2012:BX5572             & 0,0041 & 127   & HR \\
+    NL:HR:2005:AU2414             & 0,0036 & 146   & HR \\
+    NL:HR:2007:AZ6638             & 0,0033 & 474   & HR \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Dit is een vorm van het tightly-knit community-effect \parencite{TKC}. HITS-authority is de principale eigenvector van $A^\top A$ en legt vrijwel al het gewicht op de dicht co-geciteerde kern van standaardarresten, en bijna niets op de rest, ook niet op uitspraken met een aanzienlijke in-degree. Dat verklaart de extreme Gini-coëfficiënt (0,994; de top-1\% bevat 93\% van alle authority). Aan de absolute top valt authority samen met veelgeciteerde arresten, maar daaronder dalen de authority-scores snel tot waarden dicht bij nul.
+
+De hub-kant van HITS identificeert de uitspraken die naar deze kern verwijzen. De hoogste hub-scores worden vrijwel volledig ingenomen door conclusies van het Parket bij de Hoge Raad. De top-10 hubs bestaat bijna uitsluitend uit PHR-conclusies, met een uitgaande graad tussen 8 en 55 (Tabel~\ref{tab:dv2-hubs}). Over de top-100 hubs domineren het gerechtshof Arnhem-Leeuwarden (30), het Parket (22) en de rechtbank Rotterdam (21). De hub-score hangt positief samen met de uitgaande graad (Spearman 0,689). Het mechanisme werkt hier dus zoals HITS bedoelt: conclusies en feitenrechters die veel naar de standaardarresten van de Hoge Raad verwijzen vormen de hubs, en die arresten zelf vormen de authorities. De hoogst scorende hub, \texttt{ECLI:NL:PHR:2018:1189}, laat dit patroon duidelijk zien. Deze conclusie over de uitleg van een overeenkomst verwijst naar een groot aantal uitspraken met hoge authority-scores, waaronder het Haviltex-arrest en andere standaardarresten over contractuitleg zoals DSM/Fox en Meyer Europe/PontMeyer. De conclusie fungeert daarmee als een knoop die verschillende gezaghebbende arresten met elkaar verbindt.
+
+
+\begin{table}[H]
+  \centering
+  \caption{De tien uitspraken met de hoogste HITS-hub-score na opschoning. De top bestaat vrijwel volledig uit conclusies van het Parket bij de Hoge Raad.}
+  \label{tab:dv2-hubs}
+  \begin{tabular}{lrr}
+    \toprule
+    Uitspraak (ECLI:NL:\ldots) & Hub-score & Out-degree \\
+    \midrule
+    PHR:2018:1189    & $2{,}41\times10^{-4}$ & 55 \\
+    PHR:2014:17      & $2{,}35\times10^{-4}$ & 41 \\
+    PHR:2020:566     & $2{,}22\times10^{-4}$ & 16 \\
+    PHR:2013:BY8101  & $2{,}21\times10^{-4}$ & 12 \\
+    PHR:2016:197     & $2{,}20\times10^{-4}$ & 14 \\
+    PHR:2023:585     & $2{,}20\times10^{-4}$ & 35 \\
+    PHR:2010:BL5262  & $2{,}19\times10^{-4}$ & 23 \\
+    PHR:2016:1334    & $2{,}19\times10^{-4}$ & 12 \\
+    RBROT:2021:13089 & $2{,}18\times10^{-4}$ & 8  \\
+    RBROT:2014:9920  & $2{,}18\times10^{-4}$ & 10 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Samengevat wijst HITS een interpreteerbare hub-authority-structuur aan: de standaardarresten van de Hoge Raad als authorities, en de conclusies en feitenrechters die ernaar verwijzen als hubs.
+
+Authority blijkt vooral gevoelig voor een kleine kern van onderling vaak samen geciteerde standaardarresten. Door de extreme concentratie (de top-1\% bevat 93\% van de massa) is de maat voor het grootste deel van het netwerk weinig informatief. In-degree en PageRank blijven daarom de primaire invloedmaten in dit onderzoek, terwijl authority alleen wordt gebruikt als aanvullende, diagnostische maat.
+
+
+
+\section{Interpretatie}
+De invloedmaten geven een consistent beeld: invloed in het Nederlandse jurisprudentienetwerk is zwaar geconcentreerd, maar wat als invloed naar voren komt verschilt per maat en per schaal. PageRank produceert een minder geconcentreerde verdeling (Gini 0,447), doordat de teleportatieterm elke knoop een minimumkans op aandacht garandeert en zo de staart afvlakt. De pure in-degree zit daarboven (Gini 0,772). De MARC-in-degree van \textcite{vanopijnen2012} rangschikt de uitspraken precies als de in-degree, maar drukt die invloed door de logaritmische schaal veel gelijkmatiger uit (Gini 0,586). HITS-authority is met een Gini van 0,994 verreweg het scheefst verdeeld: de top-1\% bevat 93\% van alle authority-massa en de rest van het netwerk heeft vrijwel geen authority.
+
+Dat de power-law-staart voor alle drie de maten een exponent rond 2 geeft valt in lijn met eerder gerapporteerde bevindingen voor citatienetwerken. De likelihood ratio tests ondersteunen echter de waarschuwing van \textcite{broido2019}: een rechte lijn in een log-log-plot is geen direct bewijs voor een power-law. Voor in-degree en PageRank past de log-normale verdeling minstens even goed als een power law. Voor HITS-authority is het verschil tussen beide modellen eveneens niet significant, en ook de stretched exponential wordt niet significant slechter ondersteund. De resultaten geven daardoor geen duidelijke voorkeur voor een power law boven deze alternatieve verdelingen.
+
+Inhoudelijk heeft het Nederlandse jurisprudentienetwerk dus een zwaar-scheve verdeling van invloed die qua vorm lijkt op klassieke power-law-netwerken, maar zonder dat de power-law als verklarend model boven log-normale of stretched exponential alternatieven kan worden gesteld. Voor de invloedvraag is de exacte keuze van verdeling echter minder belangrijk. Belangrijker is dat invloed extreem ongelijk verdeeld is, met een kleine groep uitspraken die het grootste deel van de citaties, PageRank en authority ontvangt, en een lange staart van uitspraken die nauwelijks worden geciteerd. Daarbij meten in-degree (en de schaalvariant MARC) en PageRank een brede vorm van invloed, terwijl HITS-authority, zoals hierboven beschreven, vooral de kleine kern van standaardarresten van de Hoge Raad identificeert en daarom in het vervolg alleen als aanvullende, diagnostische maat wordt gebruikt.
+
+
+% ============================================================
+\chapter{Overeenstemming tussen invloedmaten (DV 3)}
+\label{ch:dv3}
+% ============================================================
+DV2 beschrijft de drie invloedmaten afzonderlijk. De vervolgvraag is in hoeverre deze maten dezelfde uitspraken als invloedrijk aanwijzen. \textcite{fowler2008} vonden voor het Amerikaanse Supreme Court dat hun importance score (een PageRank-variant) en in-degree slechts gedeeltelijk dezelfde invloedrijke uitspraken identificeren. \textcite{winkels2011} vergeleken voor Nederlandse rechtspraak in-degree en PageRank en vonden slechts beperkte verschillen tussen beide maten. Van Opijnen (2012) liet zien dat netwerkmaten sterk uiteenlopend presteren tegen externe benchmarks van juridisch belang (publicaties, annotaties en citaties in literatuur), wat suggereert dat verschillende maten niet noodzakelijk dezelfde uitspraken als invloedrijk identificeren. In deze deelvraag wordt dit systematisch onderzocht op het volledige jurisprudentienetwerk via rangcorrelatie over alle uitspraken (Spearman, Kendall) en via Jaccard-overlap aan de top. Dit onderscheid is inhoudelijk relevant: een hoge rangcorrelatie over alle 674.589 knopen sluit niet uit dat de top-10 verschilt, terwijl juist de top in juridisch onderzoek vaak centraal staat. Daarnaast onderzoekt deze deelvraag of de gevonden afwijkingen tussen de maten systematisch samenhangen met het jaar van de uitspraak, omdat oudere uitspraken in PageRank anders worden gewogen dan bij in-degree. De primaire invloedvergelijking betreft in dit hoofdstuk in-degree en PageRank. HITS-authority wordt meegenomen als diagnostische contrastmaat. MARC-in-degree wordt in deze vergelijking niet apart meegenomen. Omdat MARC een monotone transformatie van de in-degree is ($1 + \log_2(\text{in-degree})$), levert dit identieke rangcorrelaties en top-$k$-overlap op: in een ordinale vergelijking valt dit samen met de in-degree.
+
+
+
+\section{Methode}
+
+DV3 onderzoekt in hoeverre de drie invloedmaten uit DV2 dezelfde uitspraken als invloedrijk aanwijzen. De overeenstemming wordt op twee niveaus gemeten: over de volledige rangschikking en specifiek aan de top.
+
+
+\subsection{Rangcorrelatie over alle uitspraken} Voor alle drie de paren (in-degree vs.\ PageRank, in-degree vs.\ HITS-authority, PageRank vs.\ HITS-authority) wordt de rangcorrelatie over alle knopen berekend met twee coëfficiënten: Spearman's $\rho$ en Kendall's $\tau$ (\texttt{scipy.stats.spearmanr} en \texttt{kendalltau}). Beide zijn ongevoelig voor de absolute schaal van de maten en vergelijken alleen de volgorde van de uitspraken. $\rho$ is gevoeliger voor grote rangverschillen, terwijl $\tau$ het aandeel concordante paren tussen beide ranglijsten meet. Een waarde dicht bij $1$ wijst op een vrijwel identieke rangschikking, terwijl een waarde rond $0$ weinig overeenkomst aangeeft.
+
+\subsection{Top-$k$ Jaccard-overlap} Een hoge rangcorrelatie over honderdduizenden knopen sluit niet uit dat juist de meest invloedrijke uitspraken verschillen, terwijl in juridisch onderzoek vooral die top van belang is. Daarom wordt de overlap aan de top apart gemeten met de Jaccard-index. Voor elke maat wordt de verzameling van de $k$ hoogst scorende uitspraken genomen, en voor elk paar maten wordt de overlap berekend als
+\[
+  J(A, B) = \frac{|A \cap B|}{|A \cup B|},
+\]
+voor $k \in \{10,\ 100,\ 1{.}000,\ 10{.}000\}$. Voor verschillende waarden van $k$ wordt zichtbaar of de maten het vooral eens zijn over de absolute top of juist over de bredere groep invloedrijke uitspraken.
+
+\subsection{Leeftijdseffect} Ten slotte wordt onderzocht of de verschillen tussen de maten systematisch samenhangen met de leeftijd van een uitspraak, omdat PageRank oudere uitspraken anders weegt dan in-degree. Voor elke uitspraak wordt het publicatiejaar uit de ECLI afgeleid en wordt het rangverschil tussen PageRank en in-degree ($\log_{10}$ van de PageRank-rang minus $\log_{10}$ van de in-degree-rang) afgezet tegen het jaar. Hiervoor wordt ingezoomd op de uitspraken met een relatief hoge in-degree (bovenste deciel), zodat het effect wordt gemeten op de uitspraken die er voor de invloedvraag toe doen.
+
+
+\section{Resultaten}
+\subsection{Rangcorrelaties} Over alle 674.589 knopen vertonen de drie invloedmaten verschillende mate van rangcorrelatie. In-degree en PageRank zijn sterk met elkaar gecorreleerd (Spearman $\rho$ = 0,880; Kendall $\tau$ = 0,759). De overeenstemming tussen in-degree en HITS-authority is matig ($\rho$ = 0,639; $\tau$ = 0,537), terwijl de correlatie tussen PageRank en HITS-authority laag is ($\rho$ = 0,388; $\tau$ = 0,293).
+
+
+\begin{table}[H]
+  \centering
+  \caption{Rangcorrelaties tussen de drie invloedmaten over alle 674.589 knopen.}
+  \label{tab:dv3-rangcorrelatie}
+  \begin{tabular}{lrr}
+    \toprule
+    Paar & Spearman $\rho$ & Kendall $\tau$ \\
+    \midrule
+    In-degree vs.\ PageRank        & 0,8802 & 0,7593 \\
+    In-degree vs.\ HITS-authority  & 0,6394 & 0,5367 \\
+    PageRank vs.\ HITS-authority   & 0,3884 & 0,2929 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\subsection{Top-$k$ Jaccard-overlap} 
+De rangcorrelaties zeggen iets over het netwerk als geheel, maar voor inhoudelijke interpretatie is vooral relevant of de maten dezelfde uitspraken aan de top plaatsen. In-degree en PageRank hebben een Jaccard-overlap van 0,54 in de top-10 (7 van de 10 uitspraken komen in beide lijsten voor) en van 0,42 in de top-10.000 (Tabel~\ref{tab:dv3-jaccard}). De overlap tussen in-degree en HITS-authority is veel lager (0,14--0,19), terwijl de overlap tussen PageRank en HITS-authority het laagst is (0,09--0,18). 
+
+
+\begin{table}[ht]
+  \centering
+  \caption{Top-$k$ Jaccard-overlap tussen de drie invloedmaten.}
+  \label{tab:dv3-jaccard}
+  \begin{tabular}{rrrr}
+    \toprule
+    $k$ & id $\cap$ pr & id $\cap$ auth & pr $\cap$ auth \\
+    \midrule
+    10      & 0,5385 & 0,1765 & 0,1765 \\
+    100     & 0,4815 & 0,1429 & 0,0929 \\
+    1.000   & 0,4245 & 0,1429 & 0,0989 \\
+    10.000  & 0,4213 & 0,1947 & 0,1360 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+De onderlinge samenhang van de drie maten is zichtbaar in Figuur~\ref{fig:dv3-scatter}. In-degree en PageRank vertonen een duidelijke positieve samenhang. De punten concentreren zich steeds sterker langs een diagonale lijn naarmate de in-degree toeneemt, wat aansluit bij de hoge rangcorrelatie ($\rho = 0{,}880$) uit Tabel~\ref{tab:dv3-rangcorrelatie}. De verticale strepen ontstaan doordat in-degree een geheel getal is.
+ 
+De scatterplots met HITS-authority laten een ander patroon zien. Uitspraken met een vergelijkbare in-degree of PageRank kunnen sterk uiteenlopende authority-scores hebben en een duidelijke diagonale structuur ontbreekt. Dit sluit aan bij de lagere rangcorrelaties uit Tabel~\ref{tab:dv3-rangcorrelatie} en bij de bevinding uit Hoofdstuk~\ref{ch:dv2} dat authority vooral een kleine kern van standaardarresten identificeert.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{scatterplotVS2.png}
+  \caption{Onderlinge samenhang van de drie invloedmaten (log-log scatterplots).}
+  \label{fig:dv3-scatter}
+\end{figure}
+
+\subsection{Leeftijdseffect}
+
+De jaarverdeling van de uitspraken (op basis van het ECLI-jaar, $n = 662.777$) is rechtsscheef (Tabel~\ref{tab:dv3-jaar}): het gemiddelde ligt op 2012,9 en daarmee onder de mediaan van 2015, doordat een lange staart van oudere uitspraken (terug tot 1862) het gemiddelde omlaag trekt. Het grootste deel van de uitspraken valt tussen 2009 (Q1) en 2020 (Q3).
+
+
+\begin{table}[ht]
+  \centering
+  \caption{Beschrijvende statistiek van het uitspraakjaar (ECLI-jaar).}
+  \label{tab:dv3-jaar}
+  \begin{tabular}{lr}
+    \toprule
+    Statistiek & Waarde \\
+    \midrule
+    Aantal (met jaar) & 662.777 \\
+    Gemiddelde        & 2012,86 \\
+    Std               & 10,45 \\
+    Minimum           & 1862 \\
+    Q1 (25\%)         & 2009 \\
+    Mediaan (50\%)    & 2015 \\
+    Q3 (75\%)         & 2020 \\
+    Maximum           & 2024 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{jaarverschil2.png}
+  \caption{Verschil in rangordening tussen PageRank en in-degree per jaar, voor de 10\% meest geciteerde uitspraken. De verticale as toont $\log_{10}(\text{rang}_{\text{PR}}) - \log_{10}(\text{rang}_{\text{in-degree}})$. Een waarde boven nul betekent dat PageRank de uitspraak lager plaatst dan in-degree.}
+  \label{fig:dv3-jaarverschil}
+\end{figure}
+
+Figuur~\ref{fig:dv3-jaarverschil} zet dit rangverschil af tegen het jaar van de uitspraak, voor de uitspraken in de hoogste 10\% naar in-degree. De punten concentreren zich rond de nullijn.  Bij oudere uitspraken is de spreiding klein, waardoor vrijwel alle punten boven de nul liggen.  Bij recentere jaren wordt de spreiding groter en komen punten aan beide kanten van de nullijn te liggen, met ook een staart van uitspraken die PageRank juist hoger plaatst. De samenhang met het jaar is zwak ($\rho = 0{,}191$, $p < 0{,}001$). Het leeftijdseffect blijft daarmee beperkt.
+
+
+\section{Interpretatie}
+
+In-degree en PageRank vertonen een hoge rangcorrelatie ($\rho = 0{,}880$) en delen ook aan de top een groot deel van hun uitspraken. Beide maten rangschikken uitspraken dus grotendeels hetzelfde: een uitspraak met veel inkomende citaties krijgt doorgaans ook een hoge PageRank. Het leeftijdseffect blijft beperkt. PageRank plaatst de sterkst geciteerde uitspraken een fractie lager dan in-degree bij oudere uitspraken. Voor recentere uitspraken wordt de spreiding groter en lopen de verschillen in beide richtingen, terwijl de samenhang met het jaar zwak blijft.
+
+HITS-authority wijkt duidelijk af van beide andere maten, vooral van PageRank ($\rho = 0{,}388$). De samenhang met in-degree is groter ($\rho = 0{,}639$), maar blijft duidelijk lager dan de correlatie tussen in-degree en PageRank. Dit past bij het mechanisme dat in Hoofdstuk~\ref{ch:dv2} is beschreven. Authority richt zich vooral op een kleine groep onderling vaak samen geciteerde standaardarresten van de Hoge Raad en meet daardoor iets anders dan brede invloed in het netwerk. Ook de beperkte overlap aan de top laat dit zien. Uitspraken met een hoge in-degree kunnen een lage authority hebben wanneer zij niet tot deze kern behoren, terwijl sommige uitspraken juist een hoge authority krijgen doordat zij sterk met deze kern zijn verbonden.
+
+De resultaten sluiten aan bij \textcite{fowler2008}, die laten zien dat invloed in juridische citatienetwerken niet door één enkele maat wordt gevangen. In-degree en PageRank meten hier grotendeels dezelfde brede invloed, terwijl HITS-authority een specifieker, positioneel kenmerk meet. Voor een algemene maat van juridische invloed liggen in-degree en PageRank daarom het meest voor de hand, terwijl authority vooral informatief is over de interne structuur van de Hoge Raad-jurisprudentie.
+
+
+% ============================================================
+\chapter{Communities en rechtsgebieden (DV 4)}
+\label{ch:dv4}
+% ============================================================
+
+Een citatienetwerk kan niet alleen op het niveau van afzonderlijke uitspraken (DV2, DV3) worden geanalyseerd, maar ook op het niveau van groepen uitspraken die onderling dicht verbonden zijn. Zulke communities ontstaan doordat uitspraken die over hetzelfde onderwerp gaan elkaar relatief vaak citeren. De juridisch relevante vraag is of deze algoritmisch gevonden communities samenvallen met de inhoudelijke rechtsgebieden waarin het recht traditioneel wordt ingedeeld (bestuurs-, civiel-, strafrecht en hun deelgebieden). Wanneer dat zo is, suggereert dit dat de citatiestructuur voldoende informatie bevat om rechtsgebieden zonder vooraf gegeven labels te reconstrueren.
+
+Voor de communitydetectie wordt het Leiden-algoritme gebruikt \parencite{traag2019}, dat modulariteit optimaliseert en, anders dan Louvain \parencite{blondel2008}, garandeert dat communities intern verbonden zijn. De gevonden partitie wordt vergeleken met de rechtsgebiedlabels per uitspraak, de afleiding van die labels is beschreven in Hoofdstuk~\ref{ch:dataset}. Deze deelvraag onderzoekt dus in hoeverre de citatiestructuur overeenkomt met de indeling van de juridische rechtsgebieden, en op welk niveau die overeenkomst zichtbaar wordt.
+
+
+\section{Methode}
+
+\subsection{Communitydetectie} De communitydetectie wordt uitgevoerd op de ongerichte projectie van de jurisprudentie-subgraaf, waarin de richting van citaties wordt genegeerd en parallelle edges worden samengevoegd. De detectie wordt beperkt tot de grootste zwakke component, omdat de rest van het netwerk uit zeer kleine, losse componenten bestaat die elk als afzonderlijke community zouden meetellen. Het Leiden-algoritme \parencite{traag2019} wordt toegepast via de \texttt{leidenalg}-bibliotheek met de \texttt{ModularityVertexPartition}, die modulariteit $Q$ \parencite{newman2006} optimaliseert. Omdat het algoritme stochastisch is, wordt het met vijf verschillende seeds uitgevoerd. Per seed wordt het aantal gevonden communities en de behaalde modulariteit gerapporteerd en de partitie met de hoogste modulariteit wordt gebruikt voor de verdere vergelijking.
+
+
+\subsection{Rechtsgebiedlabels} De herkomst van de rechtsgebiedlabels is beschreven in Hoofdstuk~\ref{ch:dataset}. Voor deze deelvraag is een volledige export van de labels gebruikt, zodat voor vrijwel alle uitspraken in het netwerk een rechtsgebied beschikbaar is. Niet voor alle uitspraken is een label aanwezig: dit geldt vooral voor oudere uitspraken en ECLI's met beperkte metadata. De uiteindelijke dekking wordt gerapporteerd.
+
+De ruwe labels vereisen opschoning. Een deel van de labels bevat aanhalingstekens uit het exportformaat, sommige uitspraken hebben meerdere labels achter elkaar, en een label kan meermaals herhaald voorkomen. De opschoning verwijdert de aanhalingstekens, splitst meervoudige labels en verwijdert herhalingen binnen een uitspraak. Bij een uitspraak met meerdere rechtsgebieden wordt het eerste label aangehouden.
+
+De labels staan op verschillende niveaus. Een uitspraak heeft soms een hoofdrechtsgebied (Bestuursrecht, Civiel recht of Strafrecht) en soms een specifieker deelgebied (bijvoorbeeld Belastingrecht of Vreemdelingenrecht). Elk deelgebied is via een vaste mapping teruggebracht tot zijn hoofdrechtsgebied. De vergelijking wordt op twee niveaus uitgevoerd: het hoofdrechtsgebied en het meest specifieke rechtsgebied. Zo wordt zichtbaar of de overeenstemming afhangt van de granulariteit van de rechtsgebiedindeling.
+
+\subsection{Vergelijkingsmaten} De overeenkomst tussen de Leiden-partitie en de rechtsgebiedindeling wordt op de gelabelde set gemeten met drie maten. De Adjusted Rand Index (ARI) \parencite{hubert1985} meet de mate waarin paren uitspraken in beide indelingen consistent samen of apart worden geplaatst, gecorrigeerd voor toeval. De Normalized Mutual Information (NMI) \parencite{Danon_2005} meet de gedeelde informatie tussen beide indelingen, genormaliseerd tussen $0$ en $1$. Omdat de NMI geen correctie voor toeval bevat en daardoor kan toenemen naarmate het aantal clusters groter wordt \parencite{vinh2009}, wordt daarnaast de Adjusted Mutual Information (AMI) gerapporteerd. De homogeniteit \parencite{rosenberg2007} meet of elke community uitspraken uit één enkel rechtsgebied bevat. Hiernaast wordt per community de zuiverheid berekend: het aandeel van de uitspraken in die community dat tot het meest voorkomende rechtsgebied behoort. De verdeling van rechtsgebieden over de grootste communities wordt gevisualiseerd in een contingency-heatmap. De vergelijking rapporteert ARI, NMI, AMI, homogeniteit en zuiverheid.
+
+
+\section{Resultaten}
+
+\subsection{Communitydetectie}
+De analyse beperkt zich tot de grootste zwakke component (WCC: 496.679 knopen en 1.074.491 edges in de ongerichte projectie). De overige knopen vallen uiteen in 93.586 zeer kleine componenten die elk als aparte community zouden tellen en de communitytelling vertekenen. Leiden-detectie op de WCC geeft over vijf seeds een vrijwel gelijke modulariteit ($Q \approx 0{,}862$-$0{,}864$), maar een wisselend aantal communities (221 tot 347; Tabel~\ref{tab:dv4-leiden}). De partitie van seed 2 heeft de hoogste modulariteit ($Q = 0{,}8635$, 272 communities) en wordt voor de verdere vergelijking gebruikt.
+
+\begin{table}[ht]
+  \centering
+  \caption{Leiden community-detectie over vijf seeds op de grootste WCC (496.679 knopen).}
+  \label{tab:dv4-leiden}
+  \begin{tabular}{rrr}
+    \toprule
+    Seed & Aantal communities & Modulariteit $Q$ \\
+    \midrule
+    0 & 221 & 0,8624 \\
+    1 & 335 & 0,8631 \\
+    2 & 272 & 0,8635 \\
+    3 & 347 & 0,8634 \\
+    4 & 263 & 0,8631 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+\subsection{Rechtsgebiedlabels} 
+Voor 611.621 van de 674.589 uitspraken (91\%) is na opschoning een rechtsgebied beschikbaar. De overige 9\% betreft vooral onuitgegeven en buitenlandse ECLI's (zoals uitspraken van het EHRM) zonder Nederlands rechtsgebied. Van de gelabelde uitspraken vallen er 449.840 binnen de grootste WCC en deze vormen de set voor de vergelijking met de communities. Op hoofdniveau domineert Bestuursrecht (Tabel~\ref{tab:dv4-sample}). Een kleine restcategorie Internationaal publiekrecht (201 uitspraken) maakt een zeer klein deel van de data uit. Op het meest specifieke niveau ontstaan 31 rechtsgebieden, waarvan Belastingrecht (56.758), Socialezekerheidsrecht (43.330) en Vreemdelingenrecht (27.818) de grootste deelgebieden binnen het bestuursrecht zijn.
+
+
+
+\begin{table}[H]
+  \centering
+  \caption{Verdeling van hoofdrechtsgebieden in de gelabelde set ($n = 611.621$; 91\% dekking van het netwerk).}
+  \label{tab:dv4-sample}
+  \begin{tabular}{lr}
+    \toprule
+    Hoofdrechtsgebied & Aantal \\
+    \midrule
+    Bestuursrecht               & 337.140 \\
+    Civiel recht                & 139.536 \\
+    Strafrecht                  & 134.744 \\
+    Internationaal publiekrecht & 201 \\
+    \midrule
+    Totaal gelabeld             & 611.621 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Overeenstemming communities en rechtsgebieden}
+Tabel~\ref{tab:dv4-maten} geeft de vergelijkingsmaten op beide labelniveaus, berekend op de 449.840 gelabelde uitspraken in de WCC. Op hoofdniveau is de ARI laag (0,079) en de NMI matig (0,292), terwijl de homogeniteit hoog blijft (0,723). NMI en AMI zijn gelijk (0,292), wat wijst op een beperkte invloed van toeval op de gemeten overeenkomst. Op het specifieke niveau, met 31 in plaats van vier rechtsgebieden, stijgen ARI (0,156) en NMI (0,380), terwijl de homogeniteit daalt (0,562). De combinatie van een lage ARI en een hoge homogeniteit betekent dat de communities elk vrijwel uit één rechtsgebied bestaan, maar dat elk rechtsgebied over veel verschillende communities is verdeeld. Er is dus geen één-op-één-overeenkomst tussen communities en rechtsgebieden.
+
+\begin{table}[H]
+  \centering
+  \caption{Overeenstemming tussen Leiden-communities (WCC) en rechtsgebieden op twee labelniveaus (gelabelde set in de WCC, $n = 449.840$).}
+  \label{tab:dv4-maten}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Labelniveau & Rechtsgebieden & ARI & NMI & AMI & Homogeniteit \\
+    \midrule
+    Hoofdrechtsgebied & 4  & 0,079 & 0,292 & 0,292 & 0,723 \\
+    Specifiek         & 31 & 0,156 & 0,380 & 0,379 & 0,562 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+De zuiverheid van de twaalf grootste communities is consistent hoog (Tabel~\ref{tab:dv4-zuiverheid}, gemiddeld 0,94). Tien van de twaalf communities worden voor minstens 90\% door één hoofdrechtsgebied gevuld. Zo is community 0 vrijwel volledig strafrecht (40.675 van de gelabelde uitspraken) en community 1 vrijwel volledig civiel recht (32.441). De bestuursrechtelijke communities (5, 2, 4, 6) behoren met zuiverheden van 0,97 of hoger tot de meest homogene communities. De enige uitzondering is community 13, met een zuiverheid van 0,72. Figuur~\ref{fig:dv4-heatmap} maakt dit patroon zichtbaar: de communities zijn op aflopende zuiverheid geordend en de cellen tonen per community het percentage uitspraken per hoofdrechtsgebied. Vrijwel elke rij kleurt in precies één kolom sterk op, wat betekent dat één hoofdrechtsgebied de community domineert. Alleen community 13 is over meerdere rechtsgebieden verdeeld en vormt daarmee een duidelijke uitzondering.
+
+
+\begin{table}[H]
+  \centering
+  \caption{Zuiverheid per community voor de twaalf grootste communities (aandeel van het dominante hoofdrechtsgebied), gesorteerd op aflopende zuiverheid. De laatste drie kolommen geven het aantal gelabelde uitspraken per hoofdrechtsgebied (Internationaal publiekrecht weggelaten; $\leq 5$ per community). Gemiddelde zuiverheid 0,94. Deze twaalf communities beslaan samen 260.207 knopen, 52,4\% van de WCC.}
+  \label{tab:dv4-zuiverheid}
+  \begin{tabular}{rrrrr}
+    \toprule
+    Community-id & Zuiverheid & Bestuursrecht & Civiel recht & Strafrecht \\
+    \midrule
+    5  & 0,99 & 20.306 & 174    & 128    \\
+    1  & 0,98 & 514    & 32.441 & 302    \\
+    2  & 0,98 & 30.962 & 419    & 107    \\
+    4  & 0,98 & 20.670 & 259    & 91     \\
+    6  & 0,97 & 15.188 & 382    & 110    \\
+    0  & 0,96 & 752    & 976    & 40.675 \\
+    3  & 0,96 & 19.459 & 438    & 445    \\
+    7  & 0,96 & 13.301 & 211    & 272    \\
+    8  & 0,96 & 264    & 10.669 & 144    \\
+    9  & 0,90 & 10.472 & 555    & 575    \\
+    11 & 0,87 & 614    & 7.784  & 530    \\
+    13 & 0,72 & 673    & 1.619  & 5.984  \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{dv4heatmap2.png}
+  \caption{Aantal uitspraken per combinatie van de twaalf grootste communities en hoofdrechtsgebied (gelabelde steekproef).}
+  \label{fig:dv4-heatmap}
+\end{figure}
+
+
+De twaalf grootste communities uit Tabel~\ref{tab:dv4-zuiverheid} bevatten samen 260.207 knopen, oftewel 52,4\% van de WCC. Om te zien hoe de zuiverheid over het hele netwerk is verdeeld, toont Tabel~\ref{tab:dv4-czuiverheid} het cumulatieve aandeel van de WCC dat in communities met een zuiverheid tot een bepaalde drempel ligt. Het aandeel groeit aanvankelijk langzaam. Tot een zuiverheid van 0,90 valt slechts 23,3\% van de knopen, en ook bij 0,95 is dat nog maar 35,3\%. Daarna stijgt de curve snel: bij een zuiverheid van 0,99 is 97,4\% van alle knopen bereikt (Figuur~\ref{fig:dv4-czuiverheid}). Het grootste deel van het netwerk zit dus in zeer zuivere communities, terwijl communities met een sterk gemengde samenstelling slechts een klein deel van de knopen bevatten.
+
+\begin{table}[H]
+  \centering
+  \caption{Cumulatief aandeel van de WCC-knopen in communities met ten hoogste een gegeven zuiverheid.}
+  \label{tab:dv4-czuiverheid}
+  \begin{tabular}{rrr}
+    \toprule
+    Zuiverheid $\leq$ & Knopen & \% van de WCC \\
+    \midrule
+    0,50 & 1.044   & 0,2\% \\
+    0,60 & 20.671  & 4,2\% \\
+    0,70 & 25.940  & 5,2\% \\
+    0,75 & 46.942  & 9,5\% \\
+    0,80 & 51.588  & 10,4\% \\
+    0,85 & 61.384  & 12,4\% \\
+    0,90 & 115.963 & 23,3\% \\
+    0,95 & 175.513 & 35,3\% \\
+    0,99 & 483.961 & 97,4\% \\
+    1,00 & 496.679 & 100,0\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{zuiverheid_cumulatief.png}
+  \caption{Cumulatief aandeel van de WCC-knopen naar communityzuiverheid. De curve loopt laag tot een zuiverheid van ongeveer 0,90 en stijgt daarna steil.}
+  \label{fig:dv4-czuiverheid}
+\end{figure}
+
+Op communityniveau ligt de zuiverheid hoog (Figuur~\ref{fig:dv4-zuiverheidhist}). De mediane zuiverheid is 1,00 en het gemiddelde 0,95 over de 272 gelabelde communities. 168 van de 272 communities zijn volledig zuiver, maar die zijn klein (samen 2.751 knopen), terwijl de grote communities net onder de 1,00 liggen. Daardoor zijn de meeste communities volledig zuiver, terwijl de meeste knopen juist in een kleiner aantal grote, bijna volledig zuivere communities zitten.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{zuiverheid_hist.png}
+  \caption{Verdeling van de zuiverheid over de 272 communities (ongewogen, op communityniveau).}
+  \label{fig:dv4-zuiverheidhist}
+\end{figure}
+
+
+
+\subsection{Inspectie van community 13}
+Community 13 is met 8.632 knopen een van de communities met de laagste zuiverheid (0,72). De gelabelde uitspraken erin zijn gemengd: 5.984 strafrecht, 1.619 civiel recht en 673 bestuursrecht. Anders dan de overige communities is deze dus niet rond één rechtsgebied georganiseerd. De community bevat bovendien uitspraken van vrijwel alle instanties. De grootste groepen komen van rechtbanken en gerechtshoven uit het hele land (RBMNE, RBROT, RBAMS, RBGEL, GHSHE, RBZWB, RBDHA, GHAMS), aangevuld met uitspraken van de Hoge Raad (590), het Parket bij de Hoge Raad en enkele EHRM-uitspraken (\texttt{ECLI:CE:ECHR:\ldots}). Deze samenstelling wijst erop dat de community niet rond één rechtsgebied is gevormd, maar rond een onderwerp dat in meerdere rechtsgebieden terugkomt.
+
+De cluster is redelijk stabiel over de seeds: in de vijf Leiden-partities valt 64 tot 100\% van deze knopen telkens in dezelfde community. Community 13 is dus geen gevolg van de gekozen seed, maar een terugkerende groep uitspraken uit meerdere rechtsgebieden.
+% !!
+
+
+
+\subsection{Citatieflow tussen rechtsgebieden}
+Net als de citatieflow tussen instanties (DV5) kan ook de flow tussen rechtsgebieden als gewogen netwerk worden bekeken. Elke uitspraak heeft één rechtsgebied, en voor elke citatie wordt het paar (rechtsgebied van de citerende uitspraak, rechtsgebied van de geciteerde uitspraak) geteld. Hiervan worden de conditionele citatiekansen $P(\text{geciteerd}=j \mid \text{citerend}=i)$ berekend, samen met de N-totalen: per rij het aantal uitgaande citaties (out-strength) en per kolom het aantal inkomende citaties (in-strength). De analyse beperkt zich tot de 966.660 citaties waarvan beide uitspraken een rechtsgebied hebben.
+
+Op hoofdrechtsgebied-niveau blijft de flow sterk binnen het eigen gebied (Tabel~\ref{tab:dv4-rgflow-hoofd}). De diagonaal ligt tussen 0,96 en 0,98: bestuurs-, civiel- en strafrechtelijke uitspraken citeren overwegend uitspraken uit hetzelfde hoofdgebied. De kleine categorie Internationaal publiekrecht wijkt af en citeert vooral strafrecht (0,76). Dit zijn grotendeels mensenrechtelijke uitspraken die in strafzaken worden aangehaald.
+
+
+\begin{table}[H]
+  \centering
+  \caption{Conditionele citatiekansen $P(\text{geciteerd} \mid \text{citerend})$ tussen de vier hoofdrechtsgebieden. De laatste kolom geeft het aantal uitgaande citaties (out-strength) en de laatste rij het aantal inkomende citaties (in-strength).}
+  \label{tab:dv4-rgflow-hoofd}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    \shortstack[l]{Citerend $\downarrow$ /\\ Geciteerd $\rightarrow$} & Bestuur & Civiel & Int.\ publiek & Straf & N (uitgaand) \\
+    \midrule
+    Bestuursrecht               & 0,978 & 0,015 & 0,000 & 0,007 & 517.371 \\
+    Civiel recht                & 0,025 & 0,962 & 0,000 & 0,013 & 238.813 \\
+    Int.\ publiekrecht & 0,026 & 0,152 & 0,060 & 0,762 & 302 \\
+    Strafrecht                  & 0,015 & 0,015 & 0,001 & 0,970 & 210.174 \\
+    \midrule
+    N (inkomend)                & 515.096 & 240.514 & 187 & 210.863 & 966.660 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+
+
+Op het meest specifieke niveau wordt zichtbaar dat de deelgebieden hun eigen hoofdgebied volgen (Figuur~\ref{fig:dv4-rgflow}). Strafrecht (0,97) en civiel recht (0,89) citeren vrijwel uitsluitend zichzelf. De bestuursrechtelijke deelgebieden citeren daarentegen voor een groot deel ``omhoog'' naar het algemene bestuursrecht: belastingrecht doet dat voor 0,24 (naast 0,73 binnen zichzelf), vreemdelingenrecht voor 0,42, omgevingsrecht voor 0,63 en bestuursprocesrecht zelfs voor 0,83. Ook de civielrechtelijke deelgebieden verwijzen vaak naar het algemene civiele recht. Personen- en familierecht citeert het algemene civiel recht voor 0,44 en arbeidsrecht voor 0,85. De N-totalen laten zien dat bestuursrecht het grootste rechtsgebied is, met 517.371 uitgaande en 515.096 inkomende citaties op hoofdniveau.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{rechtsgebied_conditioneel2.png}
+  \caption{Conditionele citatiekansen $P(\text{geciteerd} \mid \text{citerend})$ tussen de twaalf grootste rechtsgebieden (specifiek niveau).}
+  \label{fig:dv4-rgflow}
+\end{figure}
+
+Deze flow bevestigt het beeld uit de communityanalyse. Citaties blijven sterk binnen het eigen rechtsgebied, wat de hoge zuiverheid van de communities verklaart. De deelgebieden binnen het bestuursrecht zijn bovendien onderling verbonden via het algemene bestuursrecht, wat past bij de verdere onderverdeling die de communities laten zien. Straf- en civiel recht zijn het sterkst zelfverwijzend, wat aansluit bij hun positie als duidelijk afgebakende communities (0 en 1).
+
+\section{Interpretatie}
+De citatiestructuur en de juridische rechtsgebiedindeling vallen niet één-op-één samen, maar hangen wel duidelijk samen. De lage ARI (0,079 op hoofdniveau) ontstaat doordat elk rechtsgebied over veel verschillende communities is verspreid: Leiden vindt 272 communities, terwijl er maar vier hoofdrechtsgebieden zijn. Tegelijkertijd is de homogeniteit hoog (0,723) en de gemiddelde zuiverheid van de grootste communities 0,94. Communities zijn dus intern vrijwel zuiver en bestaan grotendeels uit uitspraken van één rechtsgebied, maar verdelen dat rechtsgebied in veel kleinere groepen. Ook buiten de grootste communities blijft dit patroon zichtbaar, met ruim driekwart van alle WCC-knopen in een community met een zuiverheid boven 0,90 en een mediane zuiverheid van 1,00 op communityniveau. De citatiestructuur reconstrueert de rechtsgebieden daarmee niet als enkele grote groepen, maar als een verdere onderverdeling van die rechtsgebieden.
+
+Dat de overeenstemming op het specifieke niveau hoger is dan op hoofdniveau (NMI 0,380 tegenover 0,292) past hierbij. De communities komen dichter in de buurt van de fijnere deelgebieden dan van de vier brede hoofdgebieden, omdat citaties zich vooral binnen een afgebakend onderwerp concentreren. De citatiestructuur weerspiegelt dus vooral specialistische rechtsgebieden en minder de algemene hoofdindeling van het recht.
+
+Community 13 is de uitzondering die deze interpretatie verfijnt. Met een zuiverheid van 0,72 is de community overwegend strafrechtelijk, maar bevat deze ook veel civiel- en bestuursrechtelijke uitspraken en uitspraken van vrijwel alle instanties, inclusief het EHRM. Omdat de cluster redelijk stabiel over de seeds terugkomt, gaat het niet om ruis maar om een inhoudelijk samenhangende groep.
+
+
+% ============================================================
+\chapter{Citaties tussen rechterlijke instanties (DV 5)}
+\label{ch:dv5}
+% ============================================================
+
+Het Nederlandse rechtssysteem is hiërarchisch georganiseerd: rechtbanken als lagere rechterlijke instanties, gerechtshoven in hoger beroep, de Hoge Raad als hoogste algemene rechter, en daarnaast eigen hoogste bestuursrechters (Raad van State, CRvB, CBb). Een juridisch citatienetwerk kan zichtbaar maken hoe invloed zich door deze hiërarchie verspreidt, vooral of citaties ``omhoog'' lopen (lagere instantie citeert hogere als precedent), ``omlaag'' (hogere verwijst expliciet naar lagere uitspraken), of vooral ``horizontaal'' binnen hetzelfde niveau. \textcite{mcpherson2001} beschrijven homofilie in sociale netwerken als de neiging van vergelijkbare knopen om vaker met elkaar verbonden te zijn. De assortativity op instantietype \parencite{newman2003} kwantificeert dit: positief = ``soort citeert soort'' (homofilie), negatief = ``citaties gaan tussen typen heen'' (heterofilie, past meer bij een hiërarchische citatieflow). Voor juridische citatienetwerken wordt daarom vaak een negatieve coëfficiënt verwacht, omdat lagere instanties precedent zoeken bij hogere. Of dit ook werkelijk zo is, en hoe de citatieflow tussen de zeven hoofdinstanties zich verhoudt tot deze verwachting, is de vraag van dit hoofdstuk.
+
+\section{Methode}
+
+DV5 onderzoekt hoe citaties tussen de verschillende rechterlijke instanties verlopen en wat dit zegt over de hiërarchische organisatie van het netwerk. 
+
+\subsection{Instantielabels} Aan elke uitspraak wordt op basis van de instantiecode in de ECLI (\texttt{ECLI:NL:<code>:...}) een instantietype toegekend. De codes worden via een mapping samengevoegd tot zeven hoofdcategorieën: Rechtbank, Gerechtshof, Hoge Raad, Parket bij de Hoge Raad, Raad van State, Centrale Raad van Beroep en College van Beroep voor het bedrijfsleven. Codes die met \texttt{GH} of \texttt{RB} beginnen maar niet expliciet in de mapping staan, worden respectievelijk als Gerechtshof of Rechtbank geclassificeerd. Uitspraken zonder herkenbare code vallen onder Onbekend, en herkende instanties buiten de zeven hoofdcategorieën onder Overig.
+
+\subsection{Citatieflow} Voor elke gerichte edge wordt het paar (citerende instantie, geciteerde instantie) geteld, wat resulteert in een matrix waarin rij $i$ de citerende en kolom $j$ de geciteerde instantie is. De analyse beperkt zich tot de $7 \times 7$-matrix van de hoofdinstanties. Deze matrix wordt op drie manieren gerapporteerd: als absolute aantallen, als rij-genormaliseerde fracties (het aandeel van de uitgaande citaties van instantie $i$ dat naar instantie $j$ gaat) en als conditionele citatiekansen
+\[
+  P(\text{geciteerd}=j \mid \text{citerend}=i),
+\]
+gevisualiseerd in een heatmap. Daarnaast wordt de diagonaalfractie bepaald: het aandeel van de citaties dat binnen het eigen instantietype blijft, zowel over het geheel als per citerende instantie. Een hoge diagonaalfractie wijst op homofilie (instanties citeren vooral hun eigen type), een lage op citaties tussen typen. Ten slotte wordt de Onbekend-categorie apart bekeken, omdat een ongelijke verdeling van citaties naar onbekende uitspraken de overige resultaten kan vertekenen.
+
+\subsection{Assortativity} Om de neiging van instanties om naar hun eigen type te citeren in één getal samen te vatten, wordt de Newman-assortativity-coëfficiënt voor categoriale attributen berekend \parencite{newman2003}, met \texttt{nx.attribute\_assortativity\_coefficient} op het attribuut instantietype:
+\[
+  r = \frac{\sum_i e_{ii} - \sum_i a_i b_i}{1 - \sum_i a_i b_i},
+\]
+waarin $e_{ij}$ de fractie edges is die van type $i$ naar type $j$ loopt, en $a_i$ en $b_i$ de respectievelijke rij- en kolomtotalen zijn. De coëfficiënt loopt van $-1$ (perfect disassortatief: citaties lopen uitsluitend tussen verschillende typen) via $0$ (random) tot $+1$ (perfect assortatief: alle citaties binnen één type). De coëfficiënt wordt berekend op het volledige netwerk en op de subgraaf van de zeven hoofdinstanties. Op grond van de hiërarchische verwachting dat lagere instanties precedent zoeken bij hogere \parencite{mcpherson2001} wordt een negatieve coëfficiënt verwacht.
+
+\subsection{Citatierichting in de hiërarchie} Om de richting van de citatieflow te meten, worden de instanties ingedeeld in drie hiërarchische niveaus: Rechtbank (niveau 0), Gerechtshof (niveau 1) en Hoge Raad, Parket bij de Hoge Raad, Raad van State, Centrale Raad van Beroep en College van Beroep voor het bedrijfsleven (niveau 2). Elke citatie tussen twee hoofdinstanties wordt vervolgens geclassificeerd als ``lager $\rightarrow$ hoger'' (citerende instantie staat lager dan geciteerde), ``hoger $\rightarrow$ lager'' of ``zelfde niveau'', en de aandelen van deze drie categorieën worden gerapporteerd. Hiermee wordt zichtbaar in welke mate invloed in het netwerk daadwerkelijk ``omhoog'' stroomt.
+
+\section{Resultaten}
+
+\subsection{Afbakening tot zeven hoofdinstanties} 
+De ECLI-prefix levert voor het grootste deel van de uitspraken een eenduidig instantietype op. Voor de analyse worden de zeven hoofdcategorieën onderscheiden: Rechtbank (264.138 uitspraken), Gerechtshof (99.112), Hoge Raad (84.931), Parket bij de Hoge Raad (62.383), Raad van State (67.689), Centrale Raad van Beroep (61.825) en College van Beroep voor het bedrijfsleven (9.900). Samen vormen deze 649.978 knopen 96,4\% van het netwerk. De overige 24.611 knopen vallen onder Onbekend (11.812) en Overig (12.799). De categorie Overig bevat herkende instanties buiten de zeven hoofdcategorieën. Deze twee categorieën vallen in de flow analyse buiten beschouwing, die zich beperkt tot de $7 \times 7$-matrix van de hoofdinstanties.
+
+De dichtheid van de subgraaf verschilt sterk tussen de instantietypen (Tabel~\ref{tab:dv5-instanties}). Rechtbanken hebben veruit de laagste dichtheid ($0{,}75 \times 10^{-6}$). Hoewel zij het grootste aantal uitspraken leveren, zijn de onderlinge citaties relatief weinig.  De hogere bestuursrechters zijn juist veel dichter verbonden, met het College van Beroep voor het bedrijfsleven als uitschieter ($156 \times 10^{-6}$). Dat past bij een klein, gespecialiseerd rechtsgebied waarvan de uitspraken sterk naar elkaar verwijzen.
+
+
+\begin{table}[H]
+  \centering
+  \caption{Verdeling van knopen over de zeven hoofdinstanties en de Onbekend-categorie, met de dichtheid van de homogene subgraaf per instantietype (alleen edges tussen uitspraken van dezelfde instantie).}
+  \label{tab:dv5-instanties}
+  \begin{tabular}{lrr}
+    \toprule
+    Instantie & Aantal knopen & Dichtheid ($\times 10^{-6}$) \\
+    \midrule
+    Rechtbank                                  & 264.138 & 0,748 \\
+    Gerechtshof                                & 99.112  & 2,389 \\
+    Hoge Raad                                  & 84.931  & 3,635 \\
+    Raad van State                             & 67.689  & 15,935 \\
+    Parket bij de Hoge Raad                    & 62.383  & 3,268 \\
+    Centrale Raad van Beroep                   & 61.825  & 16,486 \\
+    College van Beroep voor het bedrijfsleven  & 9.900   & 155,959 \\
+    Onbekend                                   & 11.812  & 0,000 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Absolute citatieflow tussen de zeven hoofdinstanties (rij citeert kolom). Afkortingen: Rb = Rechtbank, Hof = Gerechtshof, HR = Hoge Raad, PHR = Parket bij de Hoge Raad, RvS = Raad van State, CRvB = Centrale Raad van Beroep, CBb = College van Beroep voor het bedrijfsleven.}
+  \label{tab:dv5-flow-abs}
+  \footnotesize
+  \begin{tabular}{lrrrrrrr}
+    \toprule
+    Citeert $\downarrow$ / Geciteerd $\rightarrow$ & Rb & Hof & HR & PHR & RvS & CRvB & CBb \\
+    \midrule
+    Rb   & 52.181 & 26.036 & 113.817 & 2.933   & 96.074 & 31.759 & 3.604 \\
+    Hof  & 37.596 & 23.469 & 99.493  & 2.209   & 1.230  & 616    & 180 \\
+    HR   & 3.149  & 24.190 & 26.219  & 61.021  & 224    & 966    & 49 \\
+    PHR  & 7.876  & 13.341 & 199.081 & 12.719  & 1.247   & 710    & 232 \\
+    RvS  & 33.341 & 224    & 1.180   & 25      & 73.008 & 391    & 170 \\
+    CRvB & 32.263 & 210    & 2.751   & 32      & 907    & 63.013 & 123 \\
+    CBb  & 1.607  & 160    & 887     & 16      & 840    & 188    & 15.284 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+\subsection{Conditionele citatiekansen $P(\text{geciteerd} \mid \text{citerend})$}
+De absolute citatieflow tussen de zeven hoofdinstanties staat in Tabel~\ref{tab:dv5-flow-abs}. De rij-genormaliseerde matrix (Figuur~\ref{fig:dv5-conditioneel}) geeft per citerende instantie de kans dat een citatie naar elk van de zeven hoofdinstanties gaat. Hieruit komen twee duidelijk verschillende patronen naar voren.
+
+In de civiel- en strafrechtelijke kolom loopt de flow sterk omhoog richting de cassatierechter. Rechtbanken en gerechtshoven citeren vooral de Hoge Raad (respectievelijk 34,9\% en 60,4\% van hun citaties naar de hoofdinstanties), de Hoge Raad citeert vooral het Parket bij de Hoge Raad (52,7\%), en het Parket citeert vrijwel uitsluitend de Hoge Raad (84,6\%). Deze instanties citeren hun eigen type juist weinig.
+
+De drie hoogste bestuursrechters laten juist het tegenovergestelde beeld zien: deze citeren vooral zichzelf. De Raad van State (67,4\%), de Centrale Raad van Beroep (63,5\%) en het College van Beroep voor het bedrijfsleven (80,5\%) verwijzen voor het grootste deel naar uitspraken van dezelfde instantie, en voor de rest vooral naar de Rechtbank (RvS 30,8\%, CRvB 32,5\%). De bestuursrechtelijke kolommen vormen dus zelfverwijzende deelnetwerken, terwijl de civiel- en strafrechtelijke instanties vooral naar de Hoge Raad verwijzen.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{conditionele_kans2.png}
+  \caption{Conditionele citatiekansen $P(\text{geciteerd} \mid \text{citerend})$ tussen de zeven hoofdinstanties.}
+  \label{fig:dv5-conditioneel}
+\end{figure}
+
+Van alle 1.068.841 citaties tussen de zeven hoofdinstanties blijft 24,9\% (265.893) binnen het eigen instantietype en gaat 75,1\% (802.948) naar een ander type. De diagonaalfractie per citerende instantie staat in Tabel~\ref{tab:dv5-diagonaal}.
+
+\begin{table}[H]
+  \centering
+  \caption{Aandeel van de uitgaande citaties dat binnen het eigen instantietype blijft (diagonaalfractie).}
+  \label{tab:dv5-diagonaal}
+  \begin{tabular}{lr}
+    \toprule
+    Citerende instantie & \% binnen eigen type \\
+    \midrule
+    Rechtbank                                  & 16,0\% \\
+    Gerechtshof                                & 14,2\% \\
+    Hoge Raad                                  & 22,6\% \\
+    Parket bij de Hoge Raad                    & 5,4\% \\
+    Raad van State                             & 67,4\% \\
+    Centrale Raad van Beroep                   & 63,5\% \\
+    College van Beroep voor het bedrijfsleven  & 80,5\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Onbekend-categorie} 
+De Onbekend-categorie bevat 11.812 knopen, 1,8\% van het netwerk. Deze knopen zijn uitspraken waarvan de ECLI-instantiecode niet in de standaardmapping voorkomt. Dit zijn vooral oudere ECLI's en bijzondere instanties. Het aandeel van de uitgaande citaties dat per top-7-instantie naar Onbekend gaat is niet gelijk. Het loopt uiteen van 4,04\% (Hoge Raad) tot 15,12\% (Rechtbank), met een gemiddelde rond 8\% (Tabel~\ref{tab:dv5-onbekend}).
+
+\begin{table}[H]
+  \centering
+  \caption{Fractie van de uitgaande citaties die per top-7-instantie naar de Onbekend-categorie gaat.}
+  \label{tab:dv5-onbekend}
+  \begin{tabular}{lr}
+    \toprule
+    Citerende instantie & \% naar Onbekend \\
+    \midrule
+    Rechtbank                                  & 15,12\% \\
+    Gerechtshof                                & 9,21\% \\
+    Hoge Raad                                  & 4,04\% \\
+    Parket bij de Hoge Raad                    & 5,26\% \\
+    Raad van State                             & 8,35\% \\
+    Centrale Raad van Beroep                   & 4,60\% \\
+    College van Beroep voor het bedrijfsleven  & 9,98\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Newman-assortativity} 
+Op het volledige netwerk geldt $r = 0{,}105$; bij beperking tot de zeven hoofdinstanties is er een coëfficiënt van $r = 0{,}119$. De hiërarchische structuur van het netwerk bevestigt dat citaties asymmetrisch verlopen: van de 1.068.841 citaties waarbij beide instanties behoren tot de hoofdcategorieën, loopt 50,2\% binnen hetzelfde hiërarchische niveau, 35,4\% van een lagere naar een hogere instantie en 14,4\% van een hogere naar een lagere instantie. De verdeling van de citatierichting over de drie hiërarchische niveaus staat in Tabel~\ref{tab:dv5-hierarchie}. De verhouding lager $\rightarrow$ hoger tegen hoger $\rightarrow$ lager is ongeveer 2,5 : 1.
+
+\begin{table}[H]
+  \centering
+  \caption{Citatierichting ten opzichte van de hiërarchie (alleen citaties tussen de hoofdinstanties; $n = 1.068.841$).}
+  \label{tab:dv5-hierarchie}
+  \begin{tabular}{lrr}
+    \toprule
+    Richting & Aantal citaties & \% \\
+    \midrule
+    Lager $\rightarrow$ hoger & 377.951 & 35,4\% \\
+    Hoger $\rightarrow$ lager & 153.957 & 14,4\% \\
+    Zelfde niveau             & 536.933 & 50,2\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Interpretatie}
+De licht positieve assortativity ($r = 0{,}105$) gaat in tegen de verwachting van een sterk negatieve coëfficiënt. De conditionele kansen geven hiervoor een verklaring. Twee mechanismen verhogen de coëfficiënt, en samen compenseren zij de ``lager naar hoger''-stroom die anders naar negatieve assortativity zou neigen.
+
+Het eerste mechanisme zijn de drie hoogste bestuursrechters. De Raad van State, de Centrale Raad van Beroep en het College van Beroep voor het bedrijfsleven citeren overwegend zichzelf (diagonaalfractie 67\%, 63\% en 81\%). Deze instanties vormen zelfverwijzende deelnetwerken die een groot aantal citaties binnen het eigen type opleveren en de assortativity omhoog trekken. Het tweede mechanisme is de omvang van de twee grootste citerende groepen. Rechtbanken en gerechtshoven citeren weliswaar vooral de Hoge Raad, maar door hun aantal leveren zelfs hun relatief kleine aandelen interne citaties een aanzienlijke absolute hoeveelheid gelijksoortige verbindingen op. Tegenover deze assortatieve bijdragen staat de cassatieflow van rechtbanken en hoven naar de Hoge Raad en van de Hoge Raad naar het Parket, die juist tussen typen loopt. Het effect is een kleine positieve coëfficiënt in plaats van de verwachte negatieve.
+
+De zeer hoge stroom van PHR naar HR (199.081 citaties) hangt samen met de rol van het Parket bij de Hoge Raad. Conclusies worden geschreven ter voorbereiding van cassatiezaken en verwijzen daarbij vaak naar bestaande jurisprudentie van de Hoge Raad. De ongelijke verdeling van citaties naar de Onbekend-categorie (van 4,0\% bij de Hoge Raad tot 15,1\% bij de Rechtbank) hangt samen met de samenstelling van die categorie: oudere en bijzondere ECLI's, die vaker door rechtbanken dan door de hoogste rechters worden aangehaald. 
+
+
+% ============================================================
+\chapter{Discussie}
+% ============================================================
+\section{Bevindingen in samenhang}
+De vijf deelvragen leveren samen een consistent beeld van het Nederlandse jurisprudentienetwerk op. De macrostructuur (DV1) is die van een tijdgeordend netwerk dat samenhangend maar vrijwel acyclisch is, met een verwaarloosbaar kleine sterke component.  Dit verklaart waarom de bow-tie-structuur van het World Wide Web hier niet terugkomt en bevestigt dat citaties vrijwel altijd naar het verleden wijzen. Tegen deze achtergrond is invloed in het netwerk sterk geconcentreerd (DV2), met een lange staart van uitspraken die nauwelijks worden geciteerd. De mate van concentratie hangt sterk af van de gekozen maat, maar in alle gevallen ontvangt een kleine groep uitspraken het grootste deel van de aandacht.
+
+DV3 laat zien dat in-degree en PageRank die brede invloed grotendeels hetzelfde meten, terwijl HITS-authority een afwijkend, positioneel kenmerk meet. Invloed wordt dus niet volledig door één maat beschreven, maar voor een algemene invloedmaat zijn in-degree en PageRank uitwisselbaar. De community-analyse (DV4) en de citatieflow tussen instanties (DV5) laten vervolgens de organiserende principes achter die concentratie zien. Citaties blijven sterk binnen het eigen rechtsgebied, waardoor de algoritmisch gevonden communities vrijwel zuiver zijn en vaak samenvallen met specifieke deelgebieden. In het civiele en strafrecht loopt de flow tussen instanties opwaarts naar de Hoge Raad, terwijl de hoogste bestuursrechters vooral zelfverwijzende deelnetwerken vormen.
+
+De resultaten wijzen op drie factoren die een belangrijke rol spelen in de structuur van het netwerk: de tijdsordening van citaties, de specialisatie naar rechtsgebied en de hiërarchie van rechterlijke instanties. De licht positieve assortativity laat zien dat citaties niet uitsluitend van lagere naar hogere instanties lopen. Die opwaartse stroom is wel aanwezig, maar wordt gedeeltelijk gecompenseerd door de sterke zelfverwijzing binnen de bestuursrechtelijke deelnetwerken.
+
+ 
+\section{Beperkingen}
+De resultaten kennen een aantal beperkingen die bij de interpretatie van belang zijn. De eerste betreft de data zelf. De LIDO-verwijzingen zijn automatisch uit documentteksten afgeleid en bevatten alleen informatie over het bestaan van een citatie, niet over de functie ervan. Het netwerk maakt dus geen onderscheid tussen een instemmende, een onderscheidende en een afwijzende verwijzing. ``Invloed'' in dit onderzoek betekent daarom puur kwantitatieve aandacht en niet noodzakelijk juridische autoriteit. Een veelgeciteerde uitspraak kan ook vaak worden aangehaald in een kritische context.
+
+Een tweede beperking betreft de opschoning. Een groot deel van de ruwe citaties (9,62\%) was temporeel onmogelijk en sterk geconcentreerd rond een klein aantal recente EHRM-knopen die als verzamelpunt functioneren. Deze edges zijn verwijderd omdat zij de invloedmaten, en vooral HITS-authority, sterk vertekenden. Die keuze maakt de invloedmaten betekenisvoller, maar isoleert ook ruim 23.000 knopen die alleen via zulke citaties met de rest van het netwerk verbonden waren. De opschoning verwijdert daarbij niet de internationale mensenrechtelijke verwijzingen als geheel, maar alleen de temporeel onmogelijke citaties naar de betrokken EHRM-knopen, die zelf met hun resterende citaties in het netwerk blijven. Daarnaast vraagt het Parket bij de Hoge Raad om een aparte interpretatie. De conclusies halen standaard grote groepen eerdere uitspraken tegelijk aan, waardoor richtinggevoelige maten worden beïnvloed. Het Parket is bewust in de subgraaf gehouden, maar de hub-structuur en de zeer hoge flow van het Parket naar de Hoge Raad zijn deels een gevolg van dit publicatiegedrag en niet alleen van inhoudelijke invloed.
+
+Een derde beperking betreft de labels. Het rechtsgebied is voor 91\% van de uitspraken beschikbaar. Bij meerdere labels is steeds het eerste aangehouden en zijn de deelgebieden via een vaste mapping teruggebracht tot hun hoofdgebied. Deze keuzes vereenvoudigen uitspraken die in werkelijkheid meerdere rechtsgebieden raken, zoals community 13 laat zien. De communitydetectie is bovendien uitgevoerd op de ongerichte projectie van de grootste zwakke component. Daardoor blijft de richting van citaties buiten beschouwing en valt een deel van het netwerk buiten de analyse. Het Leiden-algoritme gebruikt een random seed, waardoor elke run een iets andere indeling geeft. Over de vijf seeds blijft de modulariteit vrijwel gelijk, maar het aantal communities loopt uiteen, zodat er niet één definitieve partitie bestaat.
+
+Tot slot is de generaliseerbaarheid beperkt. De analyse betreft uitsluitend de jurisprudentie-subgraaf en laat de verwijzingen naar wetgeving buiten beschouwing, terwijl die in het civielrechtelijke stelsel de primaire rechtsbron vormen. Bovendien is op Rechtspraak.nl slechts een selectie van alle uitspraken gepubliceerd, waardoor het netwerk geen volledige weergave van de Nederlandse rechtspraak is.
+ 
+\section{Vergelijking met eerder onderzoek}
+De bevindingen sluiten op verschillende punten aan bij de literatuur. De macrostructuur bevestigt dat de bow-tie-decompositie van \textcite{broder2000} moeilijk overdraagbaar is naar een tijdgeordend citatienetwerk. Waar de SCC in het World Wide Web ongeveer 28\% van de knopen bevat, gaat het in dit netwerk om slechts 0,004\%. De power-law-analyse ondersteunt de waarschuwing van \textcite{broido2019}. De verdelingen hebben een zware staart met een exponent rond 2, maar een log-normale verdeling past minstens even goed. Een power-law kan daarom niet als verklarend model worden aangenomen. Voor de invloedvraag is dat onderscheid minder belangrijk dan de vaststelling dat invloed extreem ongelijk verdeeld is.
+
+De vergelijking tussen invloedmaten sluit aan bij \textcite{fowler2008}, die laten zien dat invloed niet door één maat wordt gevangen. Tegelijk laat dit onderzoek zien dat in-degree en PageRank op de Nederlandse data grotendeels dezelfde brede invloed meten, wat overeenkomt met de beperkte verschillen die \textcite{winkels2011} eerder vonden. De MARC-maat van \textcite{vanopijnen2012} verandert als monotone transformatie van de in-degree alleen de concentratie van de verdeling en niet de rangschikking. HITS-authority blijkt daarentegen een eigen, positioneel kenmerk te meten en is door het tightly-knit community-effect alleen informatief over een kleine kern van standaardarresten.
+ 
+De communityanalyse voegt aan dit beeld toe dat de citatiestructuur de juridische rechtsgebieden reconstrueert, maar als een verdere onderverdeling daarvan en niet als enkele grote groepen. De citatiestructuur weerspiegelt daarmee vooral specialistische rechtsgebieden. De analyse van de instantieflow laat ten slotte zien dat de verwachte negatieve assortativity niet zichtbaar wordt. De hiërarchische, opwaartse citatieflow is wel aanwezig, maar wordt sterk gecompenseerd door de zelfverwijzing binnen de hoogste bestuursrechters en door de omvang van de citaties tussen rechtbanken en gerechtshoven onderling.
+
+% ============================================================
+\chapter{Conclusie}
+% ============================================================
+Deze scriptie onderzocht welke structurele eigenschappen het Nederlandse jurisprudentie-citatienetwerk van Rechtspraak.nl vertoont, en hoe juridische invloed binnen dit netwerk is verdeeld over uitspraken, rechtsgebieden en rechterlijke instanties. Het netwerk is samenhangend maar vrijwel acyclisch, sterk geconcentreerd in zijn invloedverdeling, en georganiseerd langs specialistische rechtsgebieden en de hiërarchie van rechterlijke instanties.
+ 
+Op de deelvragen geeft het onderzoek de volgende antwoorden. De macrostructuur (DV1) is die van een tijdgeordend citatienetwerk. Het grootste deel van de knopen (73,6\%) ligt in één zwakke component, maar de grootste sterke component telt slechts 26 knopen. Een bow-tie-structuur zoals in het World Wide Web ontbreekt, en de dichtst verbonden kern zit niet bij de meest geciteerde instanties, maar bij rechtbanken die elkaar binnen hetzelfde rechtsgebied wederzijds citeren. De verdeling van invloed (DV2) is sterk scheef, met een concentratie die per maat verschilt (Gini 0,447 voor PageRank tot 0,994 voor HITS-authority). De zware staart wijkt niet duidelijk af van een log-normale verdeling, zodat een power-law niet als verklarend model kan worden aangenomen.
+ 
+In-degree en PageRank wijzen grotendeels dezelfde uitspraken als invloedrijk aan (DV3, Spearman 0,880), terwijl HITS-authority een afwijkend, positioneel kenmerk meet en zich richt op een kleine kern van standaardarresten van de Hoge Raad. Voor een algemene maat van juridische invloed liggen in-degree en PageRank daarom het meest voor de hand. De community-analyse (DV4) laat zien dat de citatiestructuur de rechtsgebieden niet als enkele grote communities terugvindt. In plaats daarvan splitst de citatiestructuur elk rechtsgebied op in meerdere, vrijwel zuivere communities, die dichter bij de fijnere deelgebieden liggen dan bij de brede hoofdindeling. De citatieflow tussen instanties (DV5) toont een opwaartse cassatieflow in het civiele en strafrecht, naast zelfverwijzende deelnetwerken bij de hoogste bestuursrechters. De assortativity op instantietype is daardoor licht positief ($r = 0{,}105$), tegen de verwachting van een sterk negatieve coëfficiënt in.
+ 
+Samengevat is invloed in het Nederlandse jurisprudentienetwerk extreem ongelijk verdeeld, maar de vorm en herkomst van die invloed worden bepaald door de tijdsordening van citaties, de specialisatie naar rechtsgebied en de institutionele hiërarchie. De keuze van invloedmaat bepaalt vooral hoe sterk de concentratie is, en in mindere mate welke uitspraken bovenaan staan.
+ 
+Voor vervolgonderzoek liggen verschillende richtingen voor de hand. De functie van citaties zou kunnen worden meegenomen, zodat onderscheid mogelijk wordt tussen instemmende en afwijzende verwijzingen. Daarnaast kan de temporele dynamiek van het netwerk worden onderzocht, bijvoorbeeld hoe invloed zich na een standaardarrest in de tijd opbouwt. Ook een expliciete weging of afsplitsing van het Parket bij de Hoge Raad en een vergelijking met andere rechtsstelsels kunnen aanvullende inzichten opleveren.
+
+
+
+
+
+% ============================================================
+% BIBLIOGRAFIE
+% ============================================================
+\printbibliography[heading=bibintoc, title={Bibliografie}]
+
+\end{document}
