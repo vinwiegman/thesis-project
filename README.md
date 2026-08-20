@@ -34,3 +34,16 @@ The network is built from citation data sourced from **LIDO** (Linked Data Overh
 Raw data and the large intermediate files are not included in this repository (size and redistribution constraints). See [Reproducing the analysis](#reproducing-the-analysis)
 
 ## Repository structure
+```
+.
+├── notebooks/
+│   ├── analysis.ipynb        # main analysis notebook: data loading, cleaning, DV1-DV5
+│   └── bowtie_diagram.ipynb  # generates the bow-tie structure figure
+├── thesis/
+│   ├── thesis.pdf            # final thesis
+│   └── thesis.tex            # LaTeX source
+├── slides/
+│   └── defense.tex           # thesis defense slides (Beamer, Dutch)
+├── references.bib
+└── README.md
+```
